@@ -1,0 +1,53 @@
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+
+    get_information("/admin/jj_measurement", function (text) {
+        text = String(text);
+//        console.log(text);
+        var index = text.indexOf('<td class="col-date" data-title="Date">');
+        var index1 = text.indexOf('<td class="col-time" data-title="Time">');
+        index = index + 39;
+        var date = "";
+        for (var i = index; i<index1; i++) {
+            if (text.charAt(i) !== " " && text.charAt(i) !== "\n") {
+                date+=text.charAt(i);
+            }
+            if (date.length === 10) {
+                break;
+            }
+        }
+
+        var index2 = text.indexOf('<td class="col-chip_name" data-title="Chip Name">');
+        index1 = index1 + 39;
+        var time = "";
+        for (var i = index1; i<index2; i++) {
+            if (text.charAt(i) !== " " && text.charAt(i) !== "\n") {
+                time+=text.charAt(i);
+            }
+            if (time.length === 8) {
+                break;
+            }
+        }
+        console.log(date);
+        console.log(time);
+
+    });
+
+    function get_information(link, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", link, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            callback(xhr.responseText);
+        }
+    };
+    xhr.send(null);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Flask &#8212; Flask_Documentation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Flask Doc Homepage" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flask Doc Homepage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="flask">
+<h1>Flask<a class="headerlink" href="#flask" title="Permalink to this headline">¶</a></h1>
+<p>Flask is used to create a python-based web interface. For more info on flask please visit their <a class="reference external" href="http://flask.pocoo.org/">docs</a></p>
+</div>
+<div class="section" id="module-flask_main">
+<span id="main-flask-code"></span><h1>Main Flask Code<a class="headerlink" href="#module-flask_main" title="Permalink to this headline">¶</a></h1>
+<p>Created on Tue Jul 10 15:20:52 2018</p>
+<p>&#64;author: sdk</p>
+<span class="target" id="module-report_flask"></span><p>Created on Wed Jun 27 14:08:50 2018</p>
+<p>&#64;author: sdk</p>
+<dl class="function">
+<dt id="report_flask.measured_chips">
+<code class="descclassname">report_flask.</code><code class="descname">measured_chips</code><span class="sig-paren">(</span><em>wafer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/report_flask.html#measured_chips"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_flask.measured_chips" title="Permalink to this definition">¶</a></dt>
+<dd><p>This creates the array for the chip map which is plotted in wafer_report</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-Web_Plot_Generation">
+<span id="backend-functions"></span><h1>Backend Functions<a class="headerlink" href="#module-Web_Plot_Generation" title="Permalink to this headline">¶</a></h1>
+<p>Created on Thu Mar 22 11:27:18 2018</p>
+<p>&#64;author: sdk</p>
+<p>helpers</p>
+<dl class="function">
+<dt id="Web_Plot_Generation.find_D">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">find_D</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#find_D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.find_D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to search a long share point link and find the important stuff</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; the link</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the index of the start of the data directy name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.format_data">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">format_data</code><span class="sig-paren">(</span><em>files</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#format_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.format_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses numpy to read data from a text file and format it, geared towards highcharts</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>files</strong> &#8211; The .txt files to get data from</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Multi-layed array, with the lowest level being pairs of I,V points</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.format_data_new">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">format_data_new</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#format_data_new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.format_data_new" title="Permalink to this definition">¶</a></dt>
+<dd><p>See format_data above</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.get_crit_data">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">get_crit_data</code><span class="sig-paren">(</span><em>chips</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#get_crit_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.get_crit_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAIN function called by wafer report</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chips</strong> &#8211; Array of chips</li>
+<li><strong>devices</strong> &#8211; Array of devices</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns a fat json:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">{chip_name:{<em>see json in judge_data</em>}}</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.get_data">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">get_data</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function to get the full IV and Rn curves, used by chip_report.
+Also checks the IV curve to see if data is good</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> &#8211; The chip where data is wanted from</li>
+<li><strong>devices</strong> &#8211; An array of device objects</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Json of format {device:{date:{Ic:{data, worked},Rn:{data}}}}</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.get_directories">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">get_directories</code><span class="sig-paren">(</span><em>chip</em>, <em>given_dir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#get_directories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.get_directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the directories where the data for a chip is stored in</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> &#8211; chip to find all the data directories for</li>
+<li><strong>given_dir</strong> &#8211; a place to start searching, can be None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array of directory strings</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.judge_data">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">judge_data</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#judge_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.judge_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as other judge data functions, MAIN one used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> &#8211; The chip</li>
+<li><strong>devices</strong> &#8211; The devices</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">working data in json: {device:{Ic:[Ic], Rn:[Rn], size:size, type:device_type}</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.judge_data_and_view">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">judge_data_and_view</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#judge_data_and_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.judge_data_and_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decides if an IV was a &#8220;good&#8221; measurement, shows graphs outlining why</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> &#8211; The chip</li>
+<li><strong>devices</strong> &#8211; Any devices that the measurements should be checked</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Nothing, but many matplotlib graphs will pop up</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.judge_data_from_files">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">judge_data_from_files</code><span class="sig-paren">(</span><em>raw_file</em>, <em>crit_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#judge_data_from_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.judge_data_from_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks to see if IV curve is &#8220;good&#8221;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>raw_file</strong> &#8211; The raw .txt file of the full IV curve</li>
+<li><strong>crit_file</strong> &#8211; The .txt file containing the Ic value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retunrs:</th><td class="field-body"><p class="first last">tuple of Bool describing if data is good and formatted data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Web_Plot_Generation.my_round">
+<code class="descclassname">Web_Plot_Generation.</code><code class="descname">my_round</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Web_Plot_Generation.html#my_round"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Web_Plot_Generation.my_round" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt at a custom rounding function
+NOTE: doesn&#8217;t work because of scientific notation</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Flask</a></li>
+<li><a class="reference internal" href="#module-flask_main">Main Flask Code</a></li>
+<li><a class="reference internal" href="#module-Web_Plot_Generation">Backend Functions</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Flask Doc Homepage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Flask Doc Homepage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Soroush Khadem.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>

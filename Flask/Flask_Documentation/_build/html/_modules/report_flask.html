@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>report_flask &#8212; Flask_Documentation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for report_flask</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jun 27 14:08:50 2018</span>
+
+<span class="sd">@author: sdk</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="k">as</span> <span class="nn">sa</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">Helpers</span> <span class="k">import</span> <span class="n">Web_Plot_Generation</span> <span class="k">as</span> <span class="n">wpg</span>
+<span class="kn">from</span> <span class="nn">Helpers</span> <span class="k">import</span> <span class="n">database_for_flask</span> <span class="k">as</span> <span class="n">d</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SQLALCHEMY_POOL_RECYCLE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># was 299</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SQLALCHEMY_POOL_TIMEOUT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+
+
+<span class="n">engine</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">create_engine</span><span class="p">(</span><span class="s2">&quot;mysql+pymysql://volt:pass@132.163.82.9/seg_sfq_v0&quot;</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pool_recycle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+<span class="n">Session</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+
+<span class="c1"># ====</span>
+<span class="c1"># Global vairables</span>
+<span class="c1"># ====</span>
+<span class="n">wafer_chip_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;2&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/SFQ_circuits_info/Designs/ChipGrid-Challenger.png?web=1&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;4&#39;</span><span class="p">,</span><span class="s1">&#39;5&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/SFQ_circuits_info/Designs/Wafer-ChipTray-pcm2a-singleJJs.png?web=1&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/SFQ_circuits_info/Designs/Wafer-ChipTray-resonators.png?web=1&#39;</span><span class="p">]</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="c1"># redirect to the real home page</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;report&#39;</span><span class="p">))</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/wafer_report&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">wafer_report</span><span class="p">():</span>
+    
+    <span class="c1"># get id from form </span>
+    <span class="n">wafer_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;wafer_select&#39;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">wafer_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wafer_id</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;report&#39;</span><span class="p">))</span>
+    
+    <span class="n">wafer</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_wafer</span><span class="p">(</span><span class="n">wafer_id</span><span class="p">)</span>
+    
+    <span class="n">measured_map</span> <span class="o">=</span> <span class="n">measured_chips</span><span class="p">(</span><span class="n">wafer</span><span class="p">)</span>
+    
+    <span class="n">chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    
+<span class="c1">#    chips = [chips[0]]</span>
+    
+    <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">num_JJs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">num_JJs</span><span class="o">!=</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1"># will be Json with critical vallues</span>
+    <span class="n">Ic_data</span> <span class="o">=</span> <span class="n">wpg</span><span class="o">.</span><span class="n">get_crit_data</span><span class="p">(</span><span class="n">chips</span><span class="p">,</span> <span class="n">devices</span><span class="p">)</span>
+    
+    <span class="n">dev_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">]</span>
+    
+    <span class="n">device_types</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">device_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">device_types</span><span class="p">:</span>
+            <span class="n">device_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">device_type</span><span class="p">)</span>
+    
+    
+    <span class="n">designs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chips</span><span class="p">:</span>
+        <span class="n">design</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_design</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">design</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">designs</span><span class="p">:</span>
+            <span class="n">designs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+
+    
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;wafer_report2.html&#39;</span><span class="p">,</span> 
+                           <span class="n">wafer</span><span class="o">=</span><span class="n">wafer</span><span class="p">,</span>
+                           <span class="n">measured_map</span><span class="o">=</span><span class="n">measured_map</span><span class="p">,</span> 
+                           <span class="n">dev_names</span><span class="o">=</span><span class="n">dev_names</span><span class="p">,</span>
+                           <span class="n">designs</span><span class="o">=</span><span class="n">designs</span><span class="p">,</span>
+                           <span class="n">device_types</span><span class="o">=</span><span class="n">device_types</span><span class="p">,</span>
+                           <span class="n">Ic_data</span><span class="o">=</span><span class="n">Ic_data</span><span class="p">)</span>
+     
+    
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/chip_report&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">chip_report</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+    <span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">request</span>
+
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">dev_filter</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter_dev&#39;</span><span class="p">)</span>
+    <span class="n">chip_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chip_select&#39;</span><span class="p">)</span>
+<span class="c1">#    chip_id = 112</span>
+    
+    <span class="k">if</span> <span class="n">dev_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">post_params</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev_filter</span><span class="p">))</span>
+        <span class="n">chip_name</span> <span class="o">=</span> <span class="n">post_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dev_filter</span> <span class="o">=</span> <span class="n">post_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dev_filter</span> <span class="o">==</span> <span class="s2">&quot;All&quot;</span><span class="p">:</span>
+            <span class="n">dev_filter</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">if</span> <span class="n">chip_name</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span> 
+            <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">chip_id</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">chip_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">chip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Error! Known bug due to A/B in wafer name!&quot;</span>
+    
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    
+    <span class="n">device_types</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">device_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">device_types</span><span class="p">:</span>
+            <span class="n">device_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">device_type</span><span class="p">)</span>
+
+    
+    <span class="n">device_type_filtered</span> <span class="o">=</span> <span class="s2">&quot;All&quot;</span>
+    <span class="k">if</span> <span class="n">dev_filter</span> <span class="ow">in</span> <span class="n">device_types</span><span class="p">:</span>
+        <span class="n">device_type_filtered</span> <span class="o">=</span> <span class="n">dev_filter</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">device_type</span><span class="o">==</span><span class="n">dev_filter</span><span class="p">]</span>
+   
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="n">wpg</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">)</span>
+    
+    <span class="n">other_chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">wafer_id</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;chip_report_format.html&#39;</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="n">chip</span><span class="p">,</span>
+                           <span class="n">other_chips</span><span class="o">=</span><span class="n">other_chips</span><span class="p">,</span>
+                           <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                           <span class="n">device_types</span><span class="o">=</span><span class="n">device_types</span><span class="p">,</span>
+                           <span class="n">device_type_filtered</span><span class="o">=</span><span class="n">device_type_filtered</span><span class="p">)</span>
+    
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/report&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">report</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="n">wafers</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_all_wafers</span><span class="p">()</span>
+
+    <span class="n">wafer</span> <span class="o">=</span> <span class="n">wafers</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;reports.html&#39;</span><span class="p">,</span>
+                           <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Report&#39;</span><span class="p">,</span>
+                           <span class="n">wafers</span><span class="o">=</span><span class="n">wafers</span><span class="p">,</span>
+                           <span class="n">chips</span> <span class="o">=</span> <span class="n">chips</span><span class="p">,</span>
+                           <span class="p">)</span>
+
+
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/wafer_selected&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">wafer_selected</span><span class="p">():</span>
+    <span class="n">wafer_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;wafer_selected_for_chips&#39;</span><span class="p">))</span>
+    <span class="n">wafer</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_wafer</span><span class="p">(</span><span class="n">wafer_id</span><span class="p">)</span>
+    <span class="n">chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">wafer_id</span><span class="p">)</span>
+<span class="c1">#    </span>
+<span class="c1">#    </span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;wafer_selected_form.html&#39;</span><span class="p">,</span> <span class="n">chips</span> <span class="o">=</span> <span class="n">chips</span><span class="p">,</span>
+                           <span class="n">wafer</span> <span class="o">=</span> <span class="n">wafer</span><span class="p">)</span>
+
+<div class="viewcode-block" id="measured_chips"><a class="viewcode-back" href="../code.html#report_flask.measured_chips">[docs]</a><span class="k">def</span> <span class="nf">measured_chips</span><span class="p">(</span><span class="n">wafer</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This creates the array for the chip map which is plotted in wafer_report</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1">#wafer_id = 3</span>
+    <span class="c1">#wafer = session.query(Wafer).first()</span>
+    <span class="n">chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">heat_map</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">row_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="s1">&#39;J&#39;</span><span class="p">,</span><span class="s1">&#39;K&#39;</span><span class="p">]</span>
+
+    <span class="c1">#This is loop is going to make the entire list in a str</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+            <span class="n">heat_map</span> <span class="o">=</span> <span class="n">heat_map</span> <span class="o">+</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">value</span> <span class="o">+</span> <span class="s1">&#39;],&#39;</span>
+
+    <span class="c1">#This loop appends values for any found chips</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chips</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">row_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+         
+        <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1">#Check to see if we have a ten&#39;s digit </span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="c1">#Lets get the measurements for this chip</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;100&#39;</span>
+        <span class="n">heat_map</span> <span class="o">=</span> <span class="n">heat_map</span> <span class="o">+</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="n">value</span> <span class="o">+</span> <span class="s1">&#39;],&#39;</span>
+
+        
+
+    <span class="k">return</span> <span class="n">heat_map</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span> <span class="n">threaded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#host=&#39;0.0.0.0&#39; allows for the local ip to be used of the pc. I allows had to create an exception in windows firewall for port 5000</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Soroush Khadem.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>

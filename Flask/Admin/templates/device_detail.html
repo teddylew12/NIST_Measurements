@@ -1,0 +1,98 @@
+<html>
+<head>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+
+
+    <style>
+        .plot {
+            width: 50%;
+            height: 600px;
+        }
+        .chart-holder {
+            width: 100%;
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+<div>Chip: {{ chip_name }}</div>
+<div>Dev: {{ dev_name }}</div>
+<div>Dir: {{ dir_name }}</div>
+<div class="chart-holder"></div>
+</body>
+<script type="text/javascript">
+
+
+
+    $(document).ready(function () {
+        var ic_data = {{ ic_data }}
+        var rn_data = {{ rn_data }}
+        var name = "{{ dev_name }}";
+//        var name = "hi";
+//        var ic_data = [[0,1], [1,1]];
+//        document.getElementById("iv_plot").height(500);
+//        document.getElementById("iv_plot").innerHTML = "Soroushhh";
+
+
+
+        $(".chart-holder").append("<div class='plot' id='iv_plot'></div>");
+        $(".chart-holder").append("<div class='plot' id='rn_plot'></div>");
+
+
+        ic_chart = create_chart("iv_plot", ic_data[0], name);
+        rn_chart = create_chart("rn_plot", rn_data[0], name);
+
+        rn_chart.update({
+            plotOptions: {
+                series: {
+                    color: '#000000'
+                }
+            }
+        })
+
+//        window.alert("Hi");
+
+    });
+
+
+
+    function create_chart(location,my_data,title) {
+        var myChart = Highcharts.chart(location, {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: title
+            },
+            xAxis: {
+                title: {
+                    text: 'Current (A)'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Voltage (V)'
+                }
+            },
+            plotOptions: {
+                line: {
+                    marker: {
+                        enabled: true
+                    }
+                }
+            },
+            series: [{
+                name: 'Voltage',
+                data: my_data
+            }]
+            }
+
+        );
+        return myChart
+    }
+</script>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Web_Plot_Generation &#8212; Flask_Documentation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Web_Plot_Generation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu Mar 22 11:27:18 2018</span>
+
+<span class="sd">@author: sdk</span>
+
+<span class="sd">helpers</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">Helpers</span> <span class="k">import</span> <span class="n">database_for_flask</span> <span class="k">as</span> <span class="n">d</span>
+
+<div class="viewcode-block" id="find_D"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.find_D">[docs]</a><span class="k">def</span> <span class="nf">find_D</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Function to search a long share point link and find the important stuff</span>
+
+<span class="sd">    :param name: the link</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: the index of the start of the data directy name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;D&quot;</span><span class="p">):</span>
+            <span class="c1"># this will break in 2020 I guess</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;1&quot;</span><span class="p">):</span>
+                <span class="k">break</span>
+        
+        <span class="n">i</span> <span class="o">=</span>  <span class="n">i</span><span class="o">-</span><span class="mi">1</span>
+        
+    
+    <span class="k">return</span> <span class="n">i</span></div>
+
+<div class="viewcode-block" id="get_directories"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.get_directories">[docs]</a><span class="k">def</span> <span class="nf">get_directories</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">given_dir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gets the directories where the data for a chip is stored in</span>
+
+<span class="sd">    :param chip: chip to find all the data directories for</span>
+<span class="sd">    :param given_dir: a place to start searching, can be None</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: array of directory strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">given_dir</span><span class="p">:</span>
+        <span class="n">full_directories</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_data_directory</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">full_directories</span> <span class="o">=</span> <span class="p">[</span><span class="n">given_dir</span><span class="p">]</span>
+    
+    <span class="n">directories</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+    <span class="c1"># get the important part of each full weblink</span>
+    
+    <span class="k">if</span> <span class="n">full_directories</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">full_directories</span><span class="p">:</span>
+            <span class="n">d_location</span> <span class="o">=</span> <span class="n">find_D</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">d_location</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            
+            <span class="n">directories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="n">d_location</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ERROR: for chip </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">directories</span></div>
+
+
+<span class="c1"># old?</span>
+<span class="k">def</span> <span class="nf">get_rawdata</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">given_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rn</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+    
+<span class="c1">#    if not given_dir:</span>
+<span class="c1">#        full_directories = d.get_data_directory(chip)</span>
+<span class="c1">#    else:</span>
+<span class="c1">#        full_directories = [given_dir]</span>
+<span class="c1">#    </span>
+<span class="c1">#    directories = []</span>
+<span class="c1">#    </span>
+<span class="c1">#    # get the important part of each full weblink</span>
+<span class="c1">#    for directory in full_directories:</span>
+<span class="c1">#        d_location = find_D(directory)</span>
+<span class="c1">#        </span>
+<span class="c1">#        if d_location==-1:</span>
+<span class="c1">#            return -1</span>
+<span class="c1">#        </span>
+<span class="c1">#        directories.append(directory[d_location:])</span>
+        
+    <span class="n">directories</span> <span class="o">=</span> <span class="n">get_directories</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">given_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">directories</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    
+    <span class="n">devices_notfound</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">devices_notfound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+        
+    <span class="n">rawdata_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span>
+        <span class="k">if</span> <span class="n">rn</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/RawData_Rn/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/RawData/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        
+        <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span> 
+            <span class="n">size</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span>
+            
+            <span class="n">raw_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">)(</span><span class="n">size</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">rn</span><span class="p">:</span>
+                <span class="n">raw_data_filename</span> <span class="o">=</span> <span class="n">raw_path</span> <span class="o">+</span> <span class="s2">&quot;_Rn_raw.dat&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">raw_data_filename</span> <span class="o">=</span> <span class="n">raw_path</span> <span class="o">+</span> <span class="s2">&quot;_Ic_raw.dat&quot;</span>
+           
+            
+            <span class="k">if</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices_notfound</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span> 
+                    <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw_data_filename</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+                    <span class="c1"># found file</span>
+                    
+                    <span class="n">rawdata_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_file</span><span class="p">)</span>
+                    <span class="n">devices_notfound</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+               
+                
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">rawdata_files</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            
+    <span class="n">data</span> <span class="o">=</span> <span class="n">format_data</span><span class="p">(</span><span class="n">rawdata_files</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="format_data"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.format_data">[docs]</a><span class="k">def</span> <span class="nf">format_data</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Uses numpy to read data from a text file and format it, geared towards highcharts</span>
+<span class="sd">    </span>
+<span class="sd">    :param files: The .txt files to get data from</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: Multi-layed array, with the lowest level being pairs of I,V points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    
+    <span class="n">full_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        
+            <span class="n">full_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">full_data</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+                
+        
+    
+    <span class="k">return</span> <span class="n">full_data</span></div>
+    
+
+<div class="viewcode-block" id="get_data"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.get_data">[docs]</a><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Main function to get the full IV and Rn curves, used by chip_report.</span>
+<span class="sd">    Also checks the IV curve to see if data is good</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: The chip where data is wanted from</span>
+<span class="sd">    :param devices: An array of device objects</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: Json of format {device:{date:{Ic:{data, worked},Rn:{data}}}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+    <span class="c1">#get data directories, find d, append dir[d:] to filtered</span>
+    <span class="c1"># or just call new function below, and split to &#39;_&#39;</span>
+    <span class="n">filtered_dirs</span> <span class="o">=</span> <span class="n">get_directories</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="c1">#    filtered_dirs = [&quot;D180531-F7/2018-06-05_15-38-55&quot;, &quot;D180531-F7/2018-06-04_15-38-55&quot;]</span>
+     
+    <span class="n">dates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">direct</span> <span class="ow">in</span> <span class="n">filtered_dirs</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;2&#39;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_2&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+<span class="c1">#            dates.append(re.split(&#39;/&#39;, direct)[1])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;returning&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+<span class="c1">#    device_names = []</span>
+<span class="c1">#    for dev in devices:</span>
+<span class="c1">#        device_names.append(dev.name)</span>
+    
+    <span class="n">meas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">meas</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">date</span>
+<span class="c1">#            path = &quot;http://132.163.181.143:9000/&quot; + chip.name + &quot;/&quot; + date + &quot;/&quot;</span>
+            
+            <span class="c1"># option for rn here</span>
+            <span class="n">raw_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData/&quot;</span>
+            <span class="n">crit_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Ic_Values/&quot;</span>
+            
+            <span class="n">raw_path_rn</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData_Rn/&quot;</span>
+            
+            <span class="n">raw_path</span> <span class="o">=</span> <span class="n">raw_path</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">crit_path</span> <span class="o">=</span> <span class="n">crit_path</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            
+            <span class="n">raw_path_rn</span> <span class="o">=</span> <span class="n">raw_path_rn</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            
+            <span class="c1"># option for rn here</span>
+            <span class="n">raw_path</span> <span class="o">=</span> <span class="n">raw_path</span> <span class="o">+</span> <span class="s2">&quot;_Ic_raw.dat&quot;</span>
+            <span class="n">crit_path</span> <span class="o">=</span> <span class="n">crit_path</span> <span class="o">+</span> <span class="s2">&quot;_Ic.dat&quot;</span>
+            
+            <span class="n">raw_path_rn</span> <span class="o">=</span> <span class="n">raw_path_rn</span> <span class="o">+</span> <span class="s2">&quot;_Rn_raw.dat&quot;</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw_path</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">crit_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">crit_path</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">success</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">judge_data_from_files</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span> <span class="n">crit_file</span><span class="p">)</span>
+<span class="c1">#                data = format_data_new(raw_file)</span>
+                
+                <span class="n">raw_file_rn</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw_path_rn</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                
+                <span class="n">data_rn</span> <span class="o">=</span> <span class="n">format_data_new</span><span class="p">(</span><span class="n">raw_file_rn</span><span class="p">)</span>
+                
+                <span class="n">meas</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">date</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">meas_current</span> <span class="o">=</span> <span class="n">meas</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">date</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]]</span>
+                <span class="n">meas_current</span><span class="p">[</span><span class="s2">&quot;Ic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">meas_current</span><span class="p">[</span><span class="s2">&quot;Rn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="n">meas_current</span><span class="p">[</span><span class="s2">&quot;Ic&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="n">meas_current</span><span class="p">[</span><span class="s2">&quot;Ic&quot;</span><span class="p">][</span><span class="s2">&quot;worked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">success</span>
+                
+                <span class="n">meas_current</span><span class="p">[</span><span class="s2">&quot;Rn&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_rn</span>
+                
+<span class="c1">#                meas[dev.name][date[:-5]][&quot;data&quot;] = data</span>
+<span class="c1">#                meas[dev.name][date[:-5]][&quot;worked&quot;] = success</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">meas</span></div>
+            
+    
+         
+
+<div class="viewcode-block" id="format_data_new"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.format_data_new">[docs]</a><span class="k">def</span> <span class="nf">format_data_new</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; See format_data above</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[[]]</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+    
+<span class="k">def</span> <span class="nf">format_data_from_raw</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+ 
+<div class="viewcode-block" id="judge_data_and_view"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.judge_data_and_view">[docs]</a><span class="k">def</span> <span class="nf">judge_data_and_view</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Decides if an IV was a &quot;good&quot; measurement, shows graphs outlining why</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: The chip</span>
+<span class="sd">    :param devices: Any devices that the measurements should be checked</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: Nothing, but many matplotlib graphs will pop up</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+
+
+    <span class="n">directories</span> <span class="o">=</span> <span class="n">get_directories</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">directories</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>    
+<span class="c1">#        path = &quot;C:/Users/sdk/Downloads/Serve/&quot; + directory</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span> <span class="o">+</span> <span class="n">directory</span>
+        <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">raw_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">raw_filename</span> <span class="o">=</span> <span class="n">raw_filename</span> <span class="o">+</span> <span class="s2">&quot;_Ic_raw.dat&quot;</span>
+            
+            <span class="n">crit_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Ic_Values/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">crit_filename</span> <span class="o">=</span> <span class="n">crit_filename</span> <span class="o">+</span> <span class="s2">&quot;_Ic.dat&quot;</span>
+            
+            <span class="c1">#try/except http open set into file</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">crit_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">crit_filename</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    
+<span class="c1">#            raw_file = raw_filename</span>
+<span class="c1">#            crit_file = crit_filename</span>
+            
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">I_c</span><span class="p">,</span> <span class="n">V_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">crit_file</span><span class="p">)</span>
+                
+                    <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">10</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span>
+                    
+                    <span class="n">I_sub</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+                    <span class="n">V_sub</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+                    
+                    
+                    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>             
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">I_sub</span><span class="p">,</span> <span class="n">V_sub</span><span class="p">)</span>
+                    
+                    <span class="n">lin_x</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">lin_y</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_sub</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bad&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">I_sub</span><span class="p">,</span><span class="n">V_sub</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_sub</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">I_sub</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">I_sub</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="mi">100</span><span class="p">):</span>
+                            <span class="n">lin_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                            <span class="n">lin_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="n">b</span><span class="p">)</span>
+                        
+                        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lin_x</span><span class="p">,</span> <span class="n">lin_y</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">1e-6</span><span class="p">:</span>
+                            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Good&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;bad&quot;</span><span class="p">)</span>
+            
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nope&quot;</span><span class="p">)</span>
+                    <span class="k">pass</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nah&quot;</span><span class="p">)</span>
+                <span class="k">pass</span></div>
+ 
+
+<div class="viewcode-block" id="judge_data_from_files"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.judge_data_from_files">[docs]</a><span class="k">def</span> <span class="nf">judge_data_from_files</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span> <span class="n">crit_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Checks to see if IV curve is &quot;good&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    :param raw_file: The raw .txt file of the full IV curve</span>
+<span class="sd">    :param crit_file: The .txt file containing the Ic value</span>
+<span class="sd">    </span>
+<span class="sd">    :retunrs: tuple of Bool describing if data is good and formatted data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">I_c</span><span class="p">,</span> <span class="n">V_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">crit_file</span><span class="p">)</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="n">format_data_from_raw</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">)</span>
+    
+        <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">10</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span>
+        
+        <span class="n">I_sub</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        <span class="n">V_sub</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        
+    
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_sub</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">I_sub</span><span class="p">,</span><span class="n">V_sub</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">1e-6</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+   
+            
+    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">data</span></div>
+
+    
+
+<div class="viewcode-block" id="my_round"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.my_round">[docs]</a><span class="k">def</span> <span class="nf">my_round</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Attempt at a custom rounding function</span>
+<span class="sd">    NOTE: doesn&#39;t work because of scientific notation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;5&#39;</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;6&#39;</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="judge_data"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.judge_data">[docs]</a><span class="k">def</span> <span class="nf">judge_data</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Same as other judge data functions, MAIN one used</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: The chip</span>
+<span class="sd">    :param devices: The devices</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: working data in json: {device:{Ic:[Ic], Rn:[Rn], size:size, type:device_type}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+
+    <span class="n">Ic_json</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;Ic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;Rn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span>
+        <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">device_type</span>
+
+    <span class="n">directories</span> <span class="o">=</span> <span class="n">get_directories</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">directories</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">filter_dir</span> <span class="o">=</span> <span class="s1">&#39;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/Forms/AllItems.aspx?newTargetListUrl=</span><span class="si">%2F</span><span class="s1">sites</span><span class="si">%2F</span><span class="s1">SEG</span><span class="si">%2F</span><span class="s1">Shared%20Documents&amp;viewpath=</span><span class="si">%2F</span><span class="s1">sites</span><span class="si">%2F</span><span class="s1">SEG</span><span class="si">%2F</span><span class="s1">Shared%20Documents</span><span class="si">%2F</span><span class="s1">Forms</span><span class="si">%2F</span><span class="s1">AllItems</span><span class="si">%2E</span><span class="s1">aspx&amp;id=</span><span class="si">%2F</span><span class="s1">sites</span><span class="si">%2F</span><span class="s1">SEG</span><span class="si">%2F</span><span class="s1">Shared%20Documents</span><span class="si">%2F</span><span class="s1">SFQ_Circuits_Measurements</span><span class="si">%2F</span><span class="s1">&#39;</span>
+    
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>    
+<span class="c1">#        path = &quot;C:/Users/sdk/Downloads/Serve/&quot; </span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span> 
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">directory</span>
+        <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">raw_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">raw_filename</span> <span class="o">=</span> <span class="n">raw_filename</span> <span class="o">+</span> <span class="s2">&quot;_Ic_raw.dat&quot;</span>
+            
+            <span class="n">crit_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Ic_Values/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">crit_filename</span> <span class="o">=</span> <span class="n">crit_filename</span> <span class="o">+</span> <span class="s2">&quot;_Ic.dat&quot;</span>
+            
+            <span class="n">Rn_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Rn_Values/&quot;</span> <span class="o">+</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+            <span class="n">Rn_filename</span> <span class="o">=</span> <span class="n">Rn_filename</span> <span class="o">+</span> <span class="s2">&quot;_Rn.dat&quot;</span>
+            
+            
+            <span class="c1">#try/except http open set into file</span>
+            
+<span class="c1">#            raw_file = raw_filename</span>
+<span class="c1">#            crit_file = crit_filename</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">crit_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">crit_filename</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">I_c</span><span class="p">,</span> <span class="n">V_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">crit_file</span><span class="p">)</span>
+
+                    
+                    <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">e</span><span class="o">==</span><span class="n">I_c</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">10</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span>
+                    
+                    
+                    <span class="n">I_sub</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+                    <span class="n">V_sub</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+                    
+                
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_sub</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">pass</span>
+    
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">I_sub</span><span class="p">,</span><span class="n">V_sub</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">1e-6</span><span class="p">:</span>
+                            
+                            <span class="k">try</span><span class="p">:</span>
+<span class="c1">#                                print(filter_dir + directory)</span>
+                                <span class="n">meas</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_meas_by_dir</span><span class="p">(</span><span class="n">filter_dir</span> <span class="o">+</span> <span class="n">directory</span><span class="p">,</span> <span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                                <span class="n">Rn</span> <span class="o">=</span> <span class="n">meas</span><span class="o">.</span><span class="n">Rn</span>
+<span class="c1">#                                Rn_file = urlopen(Rn_filename, timeout=3)</span>
+<span class="c1">#                                </span>
+<span class="c1">#                                try:</span>
+<span class="c1">#                                    Rn, Imax = np.loadtxt(Rn_file)</span>
+<span class="c1">#                                except:</span>
+<span class="c1">#                                    Rn = -1</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rn not found&quot;</span><span class="p">)</span>
+                                <span class="n">Rn</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                            
+                            <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;Ic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I_c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">Ic_json</span><span class="p">[</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;Rn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rn</span><span class="p">)</span>
+                            
+                            
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span>
+            
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nope&quot;</span><span class="p">)</span>
+                    <span class="k">pass</span>
+            
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            
+    <span class="k">return</span> <span class="n">Ic_json</span></div>
+
+
+           
+<div class="viewcode-block" id="get_crit_data"><a class="viewcode-back" href="../code.html#Web_Plot_Generation.get_crit_data">[docs]</a><span class="k">def</span> <span class="nf">get_crit_data</span><span class="p">(</span><span class="n">chips</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; MAIN function called by wafer report</span>
+<span class="sd">    </span>
+<span class="sd">    :param chips: Array of chips</span>
+<span class="sd">    :param devices: Array of devices</span>
+<span class="sd">    </span>
+<span class="sd">    :returns a fat json: {chip_name:{*see json in judge_data*}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">meas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">chip</span> <span class="ow">in</span> <span class="n">chips</span><span class="p">:</span>
+        <span class="n">meas</span><span class="p">[</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">judge_data</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">meas</span></div>
+        
+    
+    
+    
+    
+        
+    
+                 
+
+
+        
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Flask_Documentation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Soroush Khadem.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>

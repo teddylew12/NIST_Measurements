@@ -1,0 +1,106 @@
+{% extends 'admin/master.html' %}
+    {% block body %}
+        <head>
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+            <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+            <style>
+                tr {
+                    cursor: pointer;
+                }
+            </style>
+        </head>
+        <h2><i>Beta</i><br>New custom table, click on row for details</h2>
+        <form style="display: hidden" method="POST" action="{{ get_url('device_detail') }}" name="device_form" id="device_form">
+            <input type="hidden" id="chip_name" name="chip_name" value=""/>
+            <input type="hidden" id="dev_name" name="dev_name" value=""/>
+            <input type="hidden" id="dir_name" name="dir_name" value=""/>
+        </form>
+        <table class="table table-striped table-hover table-bordered display" id="meas_table">
+            <thead>
+            <tr>
+                <th>Date + Time</th>
+                <th>Chip Name</th>
+                <th>Device Name</th>
+                <th>Ic Pos (mA)</th>
+                <th>Rn</th>
+                <th style="display: none"></th>
+            </tr>
+            </thead>
+        </table>
+        <script type="text/javascript">
+            function searchTable() {
+                var input, filter, table, tr, td, i, select;
+                input = document.getElementById("table_search");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("meas_table");
+                tr = table.getElementsByTagName("tr");
+                select = document.getElementById("search_select");
+                var selection = select.options[select.selectedIndex].value;
+
+                for(i = 0; i<tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[selection];
+                    if (td) {
+                        if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        }
+                        else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+
+                }
+            }
+
+            jQuery.noConflict();
+
+            jQuery(document).ready(function($) {
+
+                var dataJson = {{ meas|tojson }}
+
+                var meas_table = $("#meas_table").DataTable({
+                    "data" : dataJson,
+                    "columns" : [
+                        {"data" : "datetime"},
+                        {"data" : "chip_name"},
+                        {"data" : "device_name"},
+                        {"data" : "Ic_pos"},
+                        {"data" : "Rn"},
+                        {"data" : "data_dir"}
+                    ],
+                    "columnDefs" : [
+                        {
+                            "targets" : [ 5 ],
+                            "visible" : false,
+                            "searchable" : false
+                        }
+                    ],
+                    "sPaginationType" : "full_numbers",
+                    "order" : [[ 0, "desc" ]]
+                });
+
+                $("#meas_table").on('click', 'tr', function(event) {
+                    var row = meas_table.row(this).data();
+
+                    if (row === undefined) {
+                        return
+                    }
+
+                    var chip_name = row["chip_name"];
+                    var device_name = row["device_name"];
+                    var data_dir = row["data_dir"];
+
+                    $("#chip_name").val(chip_name);
+                    $("#dev_name").val(device_name);
+                    $("#dir_name").val(data_dir);
+
+                    $("#device_form").submit();
+
+                });
+
+            });
+
+
+        </script>
+
+{% endblock %}
