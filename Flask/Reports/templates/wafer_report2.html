@@ -1,0 +1,962 @@
+<html>
+<head>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+
+    <!-- Custom JS functions -->
+    <script type="text/javascript" src="{{ url_for('static', filename='wafer_report_functions_v1_1.js') }}"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <title>Wafer Report</title>
+
+
+</head>
+<body>
+<!--<form style="display: hidden" method="POST" action="http://132.163.82.9:7000/chip_report" name="chip_form" id="chip_form">-->
+<form style="display: hidden" method="POST" action="{{ url_for('chip_report') }}" name="chip_form" id="chip_form">
+    <input type="hidden" id="filter_dev" name="filter_dev" value=""/>
+</form>
+<div style="margin: auto; width: 70%">
+    <div class="jumbotron">
+        <div style="width: 50%; margin: auto">
+            <h1>Wafer {{ wafer.name }}<small> {{ wafer.date }} </small></h1>
+            <h2>Approx. J<sub>c</sub> {{ wafer.Jc_approx / (100*100*1000) }} <sup>kA</sup>&frasl;<sub>cm<sup>2</sup></sub></h2>
+            <div>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Design</th>
+                        <th>Date</th>
+                        <th># Devices</th>
+                    </tr>
+                    {% for design in designs %}
+                    <tr>
+                        <td>{{ design.name }}</td>
+                        <td>{{ design.date }}</td>
+                        <td>{{ design.device_id | length }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <h2>Comments:</h2>
+	<h3>{{comment}}</h3>
+</div>
+<div style="margin: 100px">
+    <div style="display: flex; width: 100%; height: 500px">
+        <div id="measured_chips" style="display:none; width: 50%;"></div>
+        <div id="success_map" style="width: 100%"></div>
+        <!--<div style="width: 50%">-->
+            <!--<img src="{{ url_for('static', filename='blank_chip.png') }}">-->
+        <!--</div>-->
+    </div>
+    <div id="chip_ic"></div>
+    <div id="chip_rn"></div>
+    <br>
+    <hr>
+    <h2>More Plots</h2>
+    <div id="ic_rn"></div>
+    <br>
+    <div style="display: flex; width: 100%; height: 600px">
+        <div id="sqrt_ic" style="width:50%"></div>
+        <div id="sqrt_rn" style="width:50%"></div>
+    </div>
+    <div>
+        <div id="Jc_map"></div>
+        <div class="input-group" style="width: 50%;">
+            <span class="input-group-addon">Fliter devices for J<sub>c</sub> calculation</span>
+            <select id="jcFilterSelect" title="Filter" class="selectpicker form-control">
+                <option value="All">All</option>
+                {% for type in device_types %}
+                <option value={{ type }}>{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    // themes
+    var default_theme = {
+          colors: ['#2f7ed8', '#0d233a', '#8bbc21', '#910000', '#1aadce', '#492970',
+                '#f28f43', '#77a1e5', '#c42525', '#a6c96a'],
+           chart: {
+              backgroundColor: '#fff',
+              borderWidth: 0,
+              plotBackgroundColor: '#fff',
+              plotShadow: false,
+              plotBorderWidth: 0
+           },
+           title: {
+              style: {
+                    color: '#274b6d',//#3E576F',
+                    fontSize: '16px'
+              }
+           },
+           subtitle: {
+              style: {
+                    color: '#4d759e'
+               }
+           },
+           xAxis: {
+              gridLineWidth: 0,
+              lineColor: '#C0D0E0',
+              tickColor: '#C0D0E0',
+              labels: {
+                 style: {
+                    color: '#666',
+                    cursor: 'default',
+                    fontSize: '11px',
+                    lineHeight: '14px'
+                 }
+              },
+              title: {
+                 style: {
+                        color: '#4d759e',
+                        fontWeight: 'bold'
+                }
+              }
+           },
+           yAxis: {
+              minorTickInterval: null,
+              lineColor: '#C0D0E0',
+              lineWidth: 1,
+              tickWidth: 1,
+              tickColor: '#C0D0E0',
+              labels: {
+                 style: {
+                    color: '#666',
+                    cursor: 'default',
+                    fontSize: '11px',
+                    lineHeight: '14px'
+                 }
+              },
+              title: {
+                 style: {
+                        color: '#4d759e',
+                        fontWeight: 'bold'
+                }
+              }
+           },
+           legend: {
+              itemStyle: {
+                    color: '#274b6d',
+                    fontSize: '12px'
+              },
+              itemHoverStyle: {
+                 color: '#000'
+              },
+              itemHiddenStyle: {
+                 color: '#CCC'
+              }
+           },
+           labels: {
+              style: {
+                    color: '#3E576F'
+                }
+           },
+
+           navigation: {
+              buttonOptions: {
+                 theme: {
+                    stroke: '#CCCCCC'
+                 }
+              }
+           }
+        };
+    var Javi_theme = {
+	colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4'],
+	chart: {
+		backgroundColor: {
+			linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+			stops: [
+				[0, 'rgb(255, 255, 255)'],
+				[1, 'rgb(240, 240, 255)']
+			]
+		},
+		borderWidth: 2,
+		plotBackgroundColor: 'rgba(255, 255, 255, .9)',
+		plotShadow: true,
+		plotBorderWidth: 1
+	},
+	title: {
+		style: {
+			color: '#000',
+			font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+		}
+	},
+	subtitle: {
+		style: {
+			color: '#666666',
+			font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+		}
+	},
+	xAxis: {
+		gridLineWidth: 1,
+		lineColor: '#000',
+		tickColor: '#000',
+		labels: {
+			style: {
+				color: '#000',
+				font: '11px Trebuchet MS, Verdana, sans-serif'
+			}
+		},
+		title: {
+			style: {
+				color: '#333',
+				fontWeight: 'bold',
+				fontSize: '12px',
+				fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+
+			}
+		}
+	},
+	yAxis: {
+		minorTickInterval: 'auto',
+		lineColor: '#000',
+		lineWidth: 1,
+		tickWidth: 1,
+		tickColor: '#000',
+		labels: {
+			style: {
+				color: '#000',
+				font: '11px Trebuchet MS, Verdana, sans-serif'
+			}
+		},
+		title: {
+			style: {
+				color: '#333',
+				fontWeight: 'bold',
+				fontSize: '12px',
+				fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+			}
+		}
+	},
+	legend: {
+		itemStyle: {
+			font: '9pt Trebuchet MS, Verdana, sans-serif',
+			color: 'black'
+
+		},
+		itemHoverStyle: {
+			color: '#039'
+		},
+		itemHiddenStyle: {
+			color: 'gray'
+		}
+	},
+	labels: {
+		style: {
+			color: '#99b'
+		}
+	},
+
+	navigation: {
+		buttonOptions: {
+			theme: {
+				stroke: '#CCCCCC'
+			}
+		}
+	}
+};
+
+    // Highcharts plotting
+    function create_measured_map(location,my_data,title) {
+
+//        console.log(my_data);
+
+        return Highcharts.chart(location, {
+            chart: {
+                type: 'heatmap',
+                marginTop: 40,
+                marginBottom: 40,
+                plotBorderWidth: 0
+            },
+            title: {
+                text: title
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                    events: {
+
+                        click: function (event) {
+                            if (this.value > 0) {
+                                gotoChip(this.x + 1, this.y, "{{ wafer.name }}")
+                            }
+                        }
+                    }},
+                    shadow: false,
+                    borderWidth: 3,
+                    borderColor: ''
+                }
+            },
+            xAxis: {
+                categories: [1,2,3,4,5,6,7,8,9,10,11,12]
+            },
+            yAxis: {
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I','J','K', 'L'],
+                title: null
+            },
+            colorAxis: {
+                min: 0,
+                max: 300,
+                minColor: '#FFFFFF',
+                maxColor: Highcharts.getOptions().colors[0]
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+              formatter: function() {
+                  return 'Chip<br>'+'<b>' + this.series.yAxis.categories[this.point.y] + this.series.xAxis.categories[this.point.x] + '</b>';
+              }
+            },
+            series: [{
+                name: 'Chips',
+                borderWidth: 1,
+                data: my_data,
+                showInLegend: false,
+                dataLabels: {
+                    enabled: false,
+                    color: '#000000'
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                },
+                point: {
+                    events: {
+                        mouseOver: function() {
+                            if (this.value > 0) {
+                                var location = find_chip_name(this.y, this.x);
+                                var series_color = highlight_series(location);
+                                this.options.oldColor = this.color;
+                                this.update({color: series_color})
+                            }
+                        },
+                        mouseOut: function () {
+                            if (this.value > 0) {
+                                unhighlight_series();
+                                this.update({color: this.options.oldColor})
+                            }
+
+                        }
+                    }
+                }
+            }]
+        })
+    }
+
+    function create_success_map(location, xs, ys, success, num_devices) {
+
+        var my_data = [];
+
+        for(var x = 0; x<12;x++) {
+            for (var y = 0; y<12; y++) {
+                if (xs.includes(x) && ys.includes(y)) {
+                    var cell = success.find(function(element) {
+                        return element[0] === x && element[1] === y
+                    });
+                    if (cell === undefined) {
+                        my_data.push([x,y,0])
+                    }
+                    else {
+                        my_data.push(cell)
+                    }
+
+                }
+                else {
+                    my_data.push([x,y,0])
+                }
+            }
+        }
+
+        Array.prototype.containsArray = function(val) {
+            var hash = {};
+            for (var i=0;i<this.length;i++) {
+                hash[this[i]] = i;
+            }
+            return hash.hasOwnProperty(val)
+        };
+
+        var exclude_poses = [[0,0,0], [0,1,0], [0,2,0], [1,0,0], [1,1,0], [2,0,0], // bottom left
+             [0,9,0], [0,10,0], [0,11,0], [1,10,0], [1,11,0], [2,11,0], // top left
+             [11,11,0], [11,10,0], [11,9,0], [10,11,0], [10,10,0], [9,11,0], // top right
+             [11,0,0], [11,1,0], [11,2,0], [10,0,0], [10,1,0], [9,0,0]]; // bottom right
+
+        my_data = my_data.filter(function(el) {
+            return !exclude_poses.containsArray(el);
+        });
+
+        Highcharts.setOptions(default_theme);
+
+         var myChart = Highcharts.chart(location, {
+            chart: {
+                type: 'heatmap',
+                marginTop: 40,
+                marginBottom: 40,
+                plotBorderWidth: 0
+            },
+            title: {
+                text: "Success Rate"
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                    events: {
+
+                        click: function (event) {
+                            if (this.value > 0) {
+                                gotoChip(this.x + 1, this.y, "{{ wafer.name }}")
+                            }
+                        }
+                    }},
+                    shadow: false,
+                    borderWidth: 3,
+                    dataLabels: {
+                        formatter: function () {
+                            if (this.point.value > 0 ) {
+                                return Math.round((this.point.value * 100) * 100)/100 + '%'
+                            }
+                        }
+                    }
+                }
+            },
+            xAxis: {
+                categories: [1,2,3,4,5,6,7,8,9,10,11,12]
+            },
+            yAxis: {
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I','J','K', 'L'],
+                title: null
+            },
+            colorAxis: {
+                min: 0,
+                max: 1,
+                stops: [
+                    [0, '#FFFFFF'],
+                    [0.3, '#ff362e'],
+                    [0.6, '#ffdb2a'],
+                    [1, '#63ff56']
+                ]
+            },
+            legend: {
+                enabled: true,
+                align: 'right',
+                layout: 'vertical'
+            },
+            tooltip: {
+              formatter: function() {
+                  return '<b>' + this.series.yAxis.categories[this.point.y] + this.series.xAxis.categories[this.point.x] +
+                      '</b>' + '<br>' +
+                      Math.round(this.point.value*num_devices) + '/' + num_devices + ' devices worked';
+              }
+            },
+            series: [{
+                name: 'Success',
+                borderWidth: 1,
+                data: my_data,
+                showInLegend: true,
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000'
+                }
+            }]
+        })
+    }
+
+    function crit_points_plot(location, title, axis_title, dev_names, x_axis_title) {
+
+
+        Highcharts.setOptions(Javi_theme);
+
+        var myChart = Highcharts.chart(location, {
+            chart: {
+                type: 'scatter',
+                zoomType: 'xy',
+                marginBottom: '70'
+            },
+            title: {
+                text: title
+            },
+            subtitle: {
+                text: 'Click and drag to zoom in'
+            },
+            xAxis: {
+                categories: dev_names,
+                min: 0,
+                max: dev_names.length - 1,
+                gridLineWidth: 3,
+                title: {
+                    text: x_axis_title
+                }
+            },
+            yAxis: {
+                title: {
+                    text: axis_title
+                },
+                minorGridLineWidth: 1
+            },
+            legend: {
+              layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                title: {
+                  text: 'Chip<br><span style="font-size: 9px; font-weight: normal">Hover to highlight</span>'
+                }
+            },
+            plotOptions: {
+                marker: {
+                    radius: 5
+                },
+                series: {
+                    stickyTracking: false,
+                    point: {
+                        events: {
+                            mouseOver: function () {
+                                var chart = this.series.chart;
+                                if (this.series.name.indexOf('no') === -1) {
+                                    highlightChip(this.series.name, this.series.color)
+                                }
+                            },
+                            mouseOut: function () {
+                                if (this.series.name.indexOf('no') === -1) {
+                                    unhighlightChip(this.series.name)
+                                }
+                            },
+                        }
+                    }
+                },
+                tooltip: {
+                    snap: 0
+                }
+            },
+            tooltip: {
+                 formatter: function () {
+                     if (this.series.options.customInfo !== undefined) {
+                         return this.series.options.customInfo
+                     }
+                     var units = "";
+                     var val = Math.round(this.point.y * 1000) / 1000;
+                     if (title === "IC") {
+                         units = "mA";
+                         val = Math.round(this.point.y * 1000 * 1000) / 1000;
+                     }
+                     if (title === "Rn") {
+                         units = "Ohms";
+                         val = this.point.y;
+                     }
+                     if (title === "Ic*Rn") {
+                         units = "uV"
+                     }
+
+                     if (this.series.name.indexOf('no') === -1) {
+                         return '<b>' + this.series.name + '</b>' + '<br>' + this.point.category + '<br>' + title + ': ' +
+                             val + ' ' + units;
+                     }
+                     else {
+                         return '<b>' + this.series.name.substr(0,this.series.name.indexOf('_no')) + '</b>' +
+                                 '<br>' + 'Average: ' + val
+                     }
+                    }
+            }
+        });
+
+        return myChart
+    }
+
+    function create_heat_map(location, xs, ys, success, num_devices) {
+
+        var my_data = formatJcData(xs, ys, success);
+
+        Highcharts.setOptions(default_theme);
+
+         return Highcharts.chart(location, {
+            chart: {
+                type: 'heatmap',
+                marginTop: 40,
+                marginBottom: 40,
+                plotBorderWidth: 0
+            },
+            title: {
+                text: 'Nominal Jc (kA/cm<sup>2</sup>)'
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                    events: {
+
+                        click: function (event) {
+                            if (this.value > 0) {
+                                gotoChip(this.x + 1, this.y, "{{ wafer.name }}")
+                            }
+                        }
+                    }},
+                    shadow: false,
+                    borderWidth: 3,
+                    dataLabels: {
+                        formatter: function () {
+                            if (this.point.value > 0 ) {
+                                return Math.round(this.point.value * 1000) / 1000
+                            }
+                        }
+                    }
+                }
+            },
+            xAxis: {
+                categories: [1,2,3,4,5,6,7,8,9,10,11]
+            },
+            yAxis: {
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I','J','K'],
+                title: null
+            },
+            colorAxis: {
+                min: 0,
+                minColor: '#FFFFFF',
+                stops: [
+                    [0, '#FFFFFF'],
+                    [0.5, '#ffcc99'],
+                    [0.6, '#ffbf80'],
+                    [0.63, '#ffb366'],
+                    [0.66, '#ffa64d'],
+                    [0.69, '#ff9933'],
+                    [0.73, '#ff8c1a'],
+                    [0.77, '#ff8000'],
+                    [0.81, '#e67300'],
+                    [0.85, '#cc6600'],
+                    [0.89, '#b35900'],
+                    [0.93, '#994d00'],
+                    [1, '#804000']
+                ]
+            },
+            legend: {
+                enabled: true,
+                align: 'right',
+                layout: 'vertical'
+            },
+            tooltip: {
+              formatter: function() {
+                  return 'Chip<br>'+'<b>' + this.series.yAxis.categories[this.point.y] + this.series.xAxis.categories[this.point.x] + '</b>';
+              }
+            },
+            series: [{
+                name: 'Jc',
+                borderWidth: 0.5,
+                data: my_data,
+                showInLegend: true,
+                dataLabels: {
+                    enabled: true
+                }
+            }],
+
+             xs_array: xs,
+            ys_array: ys
+
+        })
+
+    }
+
+    function jcFilterChanged () {
+        // try to make global static
+        var data_json = {{ Ic_data|tojson }}
+        updateJc(data_json, this.value)
+    }
+
+    // called when page loads, heavy lifting done here
+    $(document).ready(function () {
+        // from flask
+        var which_measured = [{{ measured_map }}]
+        var data_json = {{ Ic_data|tojson }}
+        console.log(data_json);
+
+        chip_map = create_measured_map('measured_chips',which_measured,'Measured Chips');
+
+        var chip_names = Object.keys(data_json);
+//        var device_names = Object.keys(data_json[chip_names[0]]);
+
+        // for analysis plots, need sizes
+        var sizes = [];
+        var device_names_all = [];
+        var device_name_mapping = {};
+        var count = 0;
+        for (var i=0;i<chip_names.length; i++) {
+            var name = chip_names[i];
+            var device_names = Object.keys(data_json[name]);
+            for (var j=0;j<device_names.length; j++){
+                var device = device_names[j];
+                var size =  data_json[name][device]["size"];
+                if (!sizes.includes(size)) {
+                    sizes.push(size);
+                }
+                if (!device_names_all.includes(device)) {
+                    device_names_all.push(device);
+                    device_name_mapping[device] = count;
+                    count++;
+                }
+            }
+        }
+        sizes.sort(function(a,b){return a-b});
+
+
+
+
+        // blank charts
+        var Ic_chart = crit_points_plot('chip_ic', 'IC', 'Critical Current (A)', device_names_all, 'Device');
+        var Rn_chart = crit_points_plot('chip_rn', 'Rn', 'Normal Resistance (Ohms)', device_names_all, 'Device');
+        var ic_rn_chart = crit_points_plot('ic_rn', 'Ic*Rn', 'uV', device_names_all, 'Device');
+        var sqrt_ic_chart = crit_points_plot('sqrt_ic', 'sqrt_IC', 'sqrt (A)', sizes, 'Junction Size (um)');
+        var sqrt_rn_chart = crit_points_plot('sqrt_rn', '1/sqrt_Rn', '1/sqrt (Ohms)', sizes, 'Junction Size (um)');
+
+        sqrt_ic_chart.xAxis[0].setCategories(null);
+        sqrt_rn_chart.xAxis[0].setCategories(null);
+        sqrt_ic_chart.xAxis[0].update({
+            max: sizes[sizes.length -1] + 1 // use a percentage?
+        });
+        sqrt_rn_chart.xAxis[0].update({
+            max: sizes[sizes.length -1] + 1 // use a percentage?
+        });
+
+        var total_devices = device_names.length;
+
+        var xs_array = [];
+        var ys_array = [];
+        var success_array = [];
+        var Jc_array = [];
+
+        // loop through json
+        for(var i=0;i<chip_names.length;i++) {
+            // init each time to add new series
+            var ic_plot_data = [];
+            var rn_plot_data = [];
+            var ic_rn_data = [];
+            var sqrt_ic_data = [];
+            var sqrt_rn_data = [];
+            var this_sqrt_ic_data = [];
+
+            var this_chip_work = 0;
+            device_names = Object.keys(data_json[chip_names[i]]);
+            for (var j=0;j<device_names.length;j++){
+                var this_ic_data = data_json[chip_names[i]][device_names[j]]["Ic"];
+                var this_rn_data = data_json[chip_names[i]][device_names[j]]["Rn"];
+                var size = data_json[chip_names[i]][device_names[j]]["size"];
+
+                if (this_ic_data.length > 0) {
+                    this_chip_work++;
+                }
+
+                var chart_index = device_name_mapping[device_names[j]];
+
+                for(var k=0;k<this_ic_data.length;k++){
+                    if (this_ic_data[k] !== null && this_rn_data[k] !== null) {
+                        ic_plot_data.push([chart_index, this_ic_data[k]]);
+                        rn_plot_data.push([chart_index, this_rn_data[k]]);
+                        ic_rn_data.push([chart_index, this_ic_data[k] * this_rn_data[k] * 1e06]); // convert to uV
+                        sqrt_ic_data.push([size, Math.sqrt(this_ic_data[k])]);
+                        this_sqrt_ic_data.push([size, Math.sqrt(this_ic_data[k])]);
+                        if (1 / Math.sqrt(this_rn_data[k]) !== Infinity) {
+                            sqrt_rn_data.push([size, 1 / Math.sqrt(this_rn_data[k])]);
+                        }
+                    }
+
+                }
+            }
+
+
+            Ic_chart.addSeries({
+                name: chip_names[i],
+                data: ic_plot_data,
+                marker: {
+                    symbol: "circle"
+                }
+            });
+            Rn_chart.addSeries({
+                name: chip_names[i],
+                data: rn_plot_data,
+                marker: {
+                    symbol: "circle"
+                }
+            });
+            ic_rn_chart.addSeries({
+                id: chip_names[i],
+                name: chip_names[i],
+                data: ic_rn_data,
+                marker: {
+                    symbol: "circle"
+                }
+            });
+            sqrt_ic_chart.addSeries({
+                id: chip_names[i],
+                name: chip_names[i],
+                data: sqrt_ic_data,
+                marker: {
+                    symbol: "circle"
+                }
+            });
+            sqrt_rn_chart.addSeries({
+                id: chip_names[i],
+                name: chip_names[i],
+                data: sqrt_rn_data,
+                marker: {
+                    symbol: "circle"
+                }
+            });
+
+
+           // lines of best fit, etc.
+            var series = ic_rn_chart.get(chip_names[i]);
+            var average_product = find_average(ic_rn_data);
+
+//            console.log(series);
+            var max_x = 0;
+            if (series.processedXData !== undefined) {
+                max_x = series.processedXData[series.processedXData.length - 1]
+            }
+            ic_rn_chart.addSeries({
+                name: chip_names[i] + '_no',
+                showInLegend: false,
+                type: 'line',
+                data: [[0,average_product],[max_x,average_product]],
+                color: series.color,
+                marker: {
+                    enabled: false
+                }
+            });
+
+            var sqrt_ic_fit_line = findBestFitLine(sqrt_ic_data);
+            var ic_m = sqrt_ic_fit_line[0];
+            var ic_b = sqrt_ic_fit_line[1];
+            var max_size = sizes[sizes.length - 1];
+            max_size += max_size*0.1;
+
+            sqrt_ic_chart.addSeries({
+                name: chip_names[i] + '_no',
+                showInLegend: false,
+                type: 'line',
+                data: [[0,ic_b],[max_size, max_size*ic_m + ic_b]],
+                color: series.color,
+                marker: {
+                    enabled: false
+                },
+                customInfo: '<b>' + chip_names[i] + '</b> <br> Slope: ' + Math.round(ic_m*100000) / 100000 +
+                    ' (sqrt(A)/um) <br> Intercept: ' + Math.round((-ic_b/ic_m) * 100000) / 100000 + '(um)'
+            });
+
+            var sqrt_rn_fit_line = findBestFitLine(sqrt_rn_data);
+            var rn_m = sqrt_rn_fit_line[0];
+            var rn_b = sqrt_rn_fit_line[1];
+            sqrt_rn_chart.addSeries({
+                name: chip_names[i] + '_no',
+                showInLegend: false,
+                type: 'line',
+                data: [[0,rn_b],[max_size, max_size*rn_m + rn_b]],
+                color: series.color,
+                marker: {
+                    enabled: false
+                },
+                customInfo: '<b>' + chip_names[i] + '</b> <br> Slope: ' + Math.round(rn_m*100000) / 100000 +
+                    ' (sqrt(Ohms)/um) <br> Intercept: ' + Math.round((-rn_b/rn_m) * 100000) / 100000 + ' (um)'
+            });
+
+
+            // success
+            var location = get_location_on_wafter(chip_names[i].substr(8));
+            xs_array.push(location[0]);
+            ys_array.push(location[1]);
+            location.push(this_chip_work/total_devices);
+            success_array.push(location);
+
+            // Jc
+            var location2 = get_location_on_wafter(chip_names[i].substr(8));
+            location2.push(find_Jc(data_json[chip_names[i]]) / (100*100*1000));
+            Jc_array.push(location2)
+        }
+        create_success_map('success_map', xs_array, ys_array, success_array, total_devices);
+
+        create_heat_map('Jc_map', xs_array, ys_array, Jc_array, total_devices);
+
+
+        var typeList = document.getElementById("jcFilterSelect");
+        typeList.onchange = jcFilterChanged
+
+
+    }
+
+        // custom Highcharts mouse over functions
+       (function (Highcharts) {
+        var each = Highcharts.each;
+
+        Highcharts.wrap(Highcharts.Legend.prototype, 'renderItem', function (proceed, item) {
+
+            proceed.call(this, item);
+
+
+            var series = this.chart.series,
+                element = item.legendGroup.element;
+
+            element.onmouseover = function () {
+                if (item.chart.title.textStr.indexOf("IC") !== -1 || item.chart.title.textStr.indexOf("Rn") !== -1)
+                {
+                    highlightChip(item.name, item.color);
+                    each(series, function (seriesItem) {
+//                        console.log(item.name);
+//                        console.log(seriesItem.name);
+                        if (seriesItem.name.indexOf(item.name) === -1) {
+                            each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 0.05);
+                            });
+                        }
+                    });
+                }
+            }
+            element.onmouseout = function () {
+                if (item.chart.title.textStr.indexOf("IC") !== -1 || item.chart.title.textStr.indexOf("Rn") !== -1)
+                {
+                    unhighlightChip(item.name);
+                    each(series, function (seriesItem) {
+                        if (seriesItem.name.indexOf(item.name) === -1) {
+                            each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 1);
+                            });
+                        }
+                    });
+                }
+            }
+            // didnt seem to work
+            element.onclick = function () {
+                each(series, function(seriesItem) {
+                    if (seriesItem.name.indexOf(item.name)!== -1) {
+                        seriesItem.setVisible();
+                        each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 1);
+                            });
+                    }
+                })
+            }
+
+        });
+    }(Highcharts)));
+
+</script>
+</body>
+</html>

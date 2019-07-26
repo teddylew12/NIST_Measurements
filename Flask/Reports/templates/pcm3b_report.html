@@ -1,0 +1,275 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chip Report</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+</head>
+
+</head>
+<div class="container theme-showcase" role="main">
+	<div class="well">
+		<h1>Chip Report for {{ chip.name }}</h1>
+		<form class="form-inline" method="POST" action="{{ url_for('chip_report') }}" name="chip_selection">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">Change chip:</span>
+					<select name="chip_select" class="selectpicker form-control">
+						{% for c in other_chips %}
+						{% if c.id == chip.id %}
+						<option value={{ c.id }} selected="selected">{{ c.name }}</option>
+						{% else %}
+						<option value={{ c.id }}>{{ c.name }}</option>
+						{% endif %}
+						{% endfor %}
+					</select>
+				</div>
+				<button type="submit" class="btn btn-default" name="Go">Go</button>
+			</div>
+		</form>
+	</div>
+
+	<div style="display: flex">
+		<div id="loader"></div>
+		<div style="width: 50%">
+			<h2>Design: {{ design }}</h2>
+			<h2>Wafer Date: {{ chip.wafer.date }}</h2>
+			<h2>Comment:</h2>
+			<p>{{ comment }}</p> 
+		</div>
+	</div>
+	<br>
+	<!-- <div style="display: flex; width: 100%; height: 600px"> -->
+		<div id="jc-info" style="width: 100%; padding: 0px">
+			<table id="jc-act-table" class="table table-bordered table-striped">
+				<tr>
+					<th>Device</th>
+					<th>Length Resistance RL (RT)</th>
+					<th>Square Resistance Rsq (RT)</th>
+					<th>Width</th>
+					<th>Length Resistance RL (10K)</th>
+					<th>Square Resistance Rsq (10K)</th>
+					<th>Width</th>
+					<th>RRR</th>
+					<th>Tcs</th>
+				</tr>
+				<tr>
+					<td>RS</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_RT'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_RT'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_RT'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_10K'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_10K'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_10K'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RRR'][0] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Tc'][0] }}</td>
+				</tr>
+				<tr>
+					<td>M0</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_RT'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_RT'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_RT'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_10K'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_10K'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_10K'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RRR'][1] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Tc'][1] }}</td>
+				</tr>
+				<tr>
+					<td>M1</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_RT'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_RT'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_RT'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_10K'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_10K'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_10K'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RRR'][2] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Tc'][2] }}</td>
+				</tr>
+				<tr>
+					<td>M2</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_RT'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_RT'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_RT'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_10K'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_10K'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_10K'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RRR'][3] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Tc'][3] }}</td>
+				</tr>
+				<tr>
+					<td>M3</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_RT'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_RT'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_RT'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RL_10K'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Rsq_10K'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Width_10K'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['RRR'][4] }}</td>
+					<td>{{ pcm3b_data['crossbar_data']['Tc'][4] }}</td>
+				</tr>
+			</table>
+		</div>
+	<!-- </div> -->
+        <br>
+        <br>
+	<!-- <div style="display: flex; width: 100%; height: 600px"> -->
+		<div id="jc-info" style="width: 100%; padding: 0px">
+			<table id="jc-act-table" class="table table-bordered table-striped">
+				<tr>
+					<th>RS Arrays</th>
+					<th>R (RT)</th>
+					<th>R (4K)</th>
+					<th></th>
+					<th>R/256</th>
+					<th>/2.7 sqs</th>
+				</tr>
+
+				<tr>
+					<td>0.75 Arr</td>
+					<td>{{ pcm3b_data['resistor_data']['R_RT'][0] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][0] }}</td>
+					<td>@ 2mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][0] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][0] }}</td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td></td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][1] }}</td>
+					<td>@ 1mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][1] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][1] }}</td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td></td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][2] }}</td>
+					<td>@ 0.5mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][2] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][2] }}</td>
+				</tr>
+
+				<tr>
+					<td>1x1 Arr</td>
+					<td>{{ pcm3b_data['resistor_data']['R_RT'][1] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][3] }}</td>
+					<td>@ 2mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][3] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][3] }}</td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td></td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][4] }}</td>
+					<td>@ 1mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][4] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][4] }}</td>
+				</tr>
+
+				<tr>
+					<td></td>
+					<td></td>
+					<td>{{ pcm3b_data['resistor_data']['R_4K'][5] }}</td>
+					<td>@ 0.5mA</td>
+					<td>{{ pcm3b_data['resistor_data']['R_256'][5] }}</td>
+					<td>{{ pcm3b_data['resistor_data']['R_27'][5] }}</td>
+				</tr>
+			</table>
+		</div>
+	<!-- </div> -->
+        <br>
+        <br>
+	<!--<div style="display: flex; width: 100%; height: 600px"> -->
+		<div id="jc-info" style="width: 100%; padding: 0px">
+			<table id="jc-act-table" class="table table-bordered table-striped">
+				<tr>
+					<th>Vias</th>
+					<th></th>
+					<th></th>
+				</tr>
+
+				<tr>
+					<th>M1/I1/M2</th>
+					<th>R 4K(2W)</th>
+					<th>Imax(mA)</th>
+				</tr>
+
+				<tr>
+					<td>0.75</td>
+					<td>{{ pcm3b_data['via_data']['R_4K_vias'][0] }}</td>
+					<td>{{ pcm3b_data['via_data']['Imax'][0] }}</td>
+				</tr>
+
+				<tr>
+					<td>1</td>
+					<td>{{ pcm3b_data['via_data']['R_4K_vias'][1] }}</td>
+					<td>{{ pcm3b_data['via_data']['Imax'][1] }}</td>
+				</tr>
+
+				<tr>
+					<th>M1/I0/M0</th>
+					<th>R 4K(2W)</th>
+					<th>Imax(mA)</th>
+				</tr>
+
+				<tr>
+					<td>0.75</td>
+					<td>{{ pcm3b_data['via_data']['R_4K_vias'][2] }}</td>
+					<td>{{ pcm3b_data['via_data']['Imax'][2] }}</td>
+				</tr>
+
+				<tr>
+					<td>1</td>
+					<td>{{ pcm3b_data['via_data']['R_4K_vias'][3] }}</td>
+					<td>{{ pcm3b_data['via_data']['Imax'][3] }}</td>
+				</tr>
+
+				<tr>
+					<th>M2/I2/M3</th>
+					<th>R 4K(2W)</th>
+					<th>Imax(mA)</th>
+				</tr>
+
+				<tr>
+					<td>1</td>
+					<td>{{ pcm3b_data['via_data']['R_4K_vias'][4] }}</td>
+					<td>{{ pcm3b_data['via_data']['Imax'][4] }}</td>
+				</tr>
+			</table>
+		</div>
+	<!--</div>-->
+    	<br>
+    	<br>
+	<!--<div style="display: flex; width: 100%; height: 600px">-->
+		<div id="jc-info" style="width: 100%; padding: 0px">
+			<table id="jc-act-table" class="table table-bordered table-striped">
+				<tr>
+					<th>Device</th>
+					<th>I<sub>c</sub> (mA)</th>
+					<th>R<sub>n</sub> (ohms)</th>
+					<th>I<sub>flux</sub> Period (mA)</th>
+					<th>V<sub>resonance step</sub> (V)</th>		
+				</tr>
+            {% for meas in SQUID_data %}
+				<tr>
+					<td>{{ meas.device_name }}</td>
+					<td>{{ meas.Ic }}</td>
+					<td>{{ meas.Rn }}</td>
+					<td>{{ meas.Period }}</td>
+					<td>{{ meas.Vresstep }}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	<!--</div>-->
+</div>

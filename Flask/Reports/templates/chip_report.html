@@ -1,0 +1,211 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chip Report</title>
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="../static/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!--<script src="http://code.jquery.com/jquery-latest.js"></script>-->
+    <script src="../static/js/bootstrap.min.js"></script>
+
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="grid.css">
+
+    <style>
+        .grid1 {background-color: black;}
+        .grid {margin:auto;
+            padding:5px;
+            top: 5px;
+            /*border:5px;*/
+            /*outline:1px solid #000;*/
+            outline: none;
+            display:inline-grid;
+        }
+
+        #grid-container {
+            position: relative;
+            /*top: 30px;*/
+            /*left: 30px;*/
+            /*margin-right: 300px;*/
+            outline:2px solid #000;
+  /*font-size: 11;*/
+            margin:auto;
+            height:2500px;
+            width:100%;
+            padding: 0;
+            border: none;
+        }
+
+        .data-div{
+            margin-left: 30px;
+            margin-right: 30px;
+            margin-bottom: 30px;
+
+        }
+    </style>
+
+
+</head>
+<div class="container theme-showcase" role="main">
+  <div class="well">
+      <h1>Chip Report for {{ chip.name }}</h1>
+      <form class="form-inline" method="POST" action="{{ url_for('chip_report') }}" name="chip_selection">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon">Change chip:</span>
+                <select name="chip_select" class="selectpicker form-control">
+                    {% for c in other_chips %}
+                    {% if c.id == chip.id %}
+                    <option value={{ c.id }} selected="selected">{{ c.name }}</option>
+                    {% else %}
+                    <option value={{ c.id }}>{{ c.name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-default" name="Go">Go</button>
+        </div>
+      </form>
+  </div>
+
+   <div class="row">
+
+        <div class="col-md-6">
+          <table class="table table-bordered">
+      <!--<table style="text-align: left;", border=".5", width=10%>-->
+          <tr>
+            <th>Device</th>
+            <th>Number of Measurements</th>
+          </tr>
+          {% for dev in devices%}
+              <tr>
+                <td>{{ dev.name }}</td>
+                  <!--<td>{{ device_names[loop.index - 1] }}</td>-->
+                <td>{{ meas[loop.index - 1] }}</td>
+              </tr>
+          {% endfor %}
+      </table>
+      </div>
+    </div>
+</div>
+</div>
+<br>
+<div class="data-div">
+    <form class="form-inline" method="POST" action="{{ url_for('chip_report') }}" name="filter_dev">
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon">Add a filter:</span>
+                <select name="filter_dev" class="selectpicker form-control">
+                    <option value={{ chip.name + '//All' }}>All</option>
+                    {% for type in device_types %}
+                    <option value={{ chip.name + '//' + type }}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-default" name="Go">Apply</button>
+        </div>
+    </form>
+    <br>
+    <button id="hideshowbtn" class ="btn btn-default" onclick="hideshow()">Hide</button>
+    <div id="grid-container"></div>
+</div>
+<script type="text/javascript">
+
+    function hideshow() {
+        var e = document.getElementById("grid-container");
+        var b = document.getElementById("hideshowbtn");
+        if (e.style.display == "none") {
+            e.style.display = "block";
+            b.innerHTML = "Hide";
+        }
+        else {
+            e.style.display = "none";
+            b.innerHTML = "Show";
+        }
+
+    }
+
+function create_chart(location,my_data,title) {
+
+    var myChart = Highcharts.chart(location, {
+        chart: {
+//            height: 400,
+            type: 'line'
+        },
+        title: {
+            text: title //{{ device_names [0] }}
+        },
+        xAxis: {
+//            categories: ['Apples', 'Bananas', 'Oranges']
+            title: {
+                text: 'Current (A)'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Voltage (V)'
+            }
+        },
+        plotOptions: {
+          line: {
+              marker: {
+                  enabled: true
+              }
+          }
+        },
+        series: [{
+            name: 'Voltage',
+            data: my_data
+        }]
+    }
+    );
+    return myChart
+}
+
+function genDivs(x){
+    $("#grid-container").append("<h1>Currently showing: {{ device_type_filtered }}</h1>");
+    for (var rows = 0; rows < x; rows++) {
+        for (var columns = 0; columns < x; columns++) {
+            $("#grid-container").append("<div class='grid' id='x" + (x*rows + columns) + "' ></div>");
+        }
+//        $("grid-container").append("<br>")
+    }
+
+    $(".grid").height($("#grid-container").height()/x);
+    $(".grid").width($("#grid-container").width()/(x));
+
+
+
+}
+
+$(document).ready(function () {
+    var data = {{ test_data }}
+    var names =[];
+
+    {% for name in device_names %}
+        names.push("{{ name }}")
+    {% endfor %}
+
+    var square_side = Math.ceil(Math.sqrt(names.length));
+
+    genDivs(square_side);
+
+    for (var i = 0; i<data.length; i++) {
+
+//        $('<div>',{id:'x'+i, style:'width:25%;'}).appendTo('body');
+        chart = create_chart('x' + i, data[i], names[i]);
+    }
+
+    $("#grid-container").height($(".grid").height()*square_side);
+
+});
+
+</script>
+</html>
+

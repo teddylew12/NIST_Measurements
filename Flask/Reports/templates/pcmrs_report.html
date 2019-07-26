@@ -1,0 +1,536 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chip Report</title>
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script> <!--Anything in <script> tags is importing a Javascript file for animations/updating data in response to user input --> 
+    
+   <script type="text/javascript" src="{{ url_for('static', filename='wafer_report_functions_v1_2.js') }}"></script>
+   
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    
+    <!-- This is the JavaScript associated with the CSS theme we're using -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    
+    <!-- Import the Javascript we're using for the I-V curves -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+    <!-- <style> tag specifies how HTML elements should render in a browser -->
+    <style> 
+        .grid-container { /* Specifies the format of the grid container for the I-V curves */
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+            grid-template-areas: "header header header header header";
+            grid-auto-flow: row;
+          grid-gap: 10px;
+          background-color: #2196F3;
+          padding: 5px;
+            justify-items: stretch;
+
+        }
+        .header { /*Specifies the format for the header */
+            grid-area: header;
+            padding: 0px;
+        }
+
+        .grid-container > div {
+          background-color: rgba(255, 255, 255, 0.8);
+          text-align: center;
+          padding: 0px;
+        }
+
+
+        .data-div{ /* This is one of the CSS classes we define ourselves*/
+            margin-left: 30px;
+            margin-right: 30px;
+            margin-bottom: 30px;
+
+
+        }
+
+        .my-modal {
+            z-index: 999;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            /*padding-bottom: 20px;*/
+            top: 0;
+            /*bottom: 0;*/
+            right: 0;
+            left: 0;
+            background: rgba(0,0,0,0.7);
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+    </style>
+    
+</head>
+
+<div class="container theme-showcase" role="main">
+	<div class="well">
+		<h1>Chip Report for {{ chip.name }}</h1>
+		<form class="form-inline" method="POST" action="{{ url_for('chip_report') }}" name="chip_selection">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">Change chip:</span>
+					<select name="chip_select" class="selectpicker form-control">
+						{% for c in other_chips %}
+						{% if c.id == chip.id %}
+						<option value={{ c.id }} selected="selected">{{ c.name }}</option>
+						{% else %}
+						<option value={{ c.id }}>{{ c.name }}</option>
+						{% endif %}
+						{% endfor %}
+					</select>
+				</div>
+				<button type="submit" class="btn btn-default" name="Go">Go</button>
+			</div>
+		</form>
+	</div>
+    <h3>Note: This data has a 4K resistance correction for 2x20 and 10x40.</h3>
+	<div style="display: flex">
+		<div id="loader"></div>
+		<div style="width: 50%">
+			<h2>Design: {{ design }}</h2>
+			<h2>Wafer Date: {{ chip.wafer.date }}</h2>
+			<h2>Comment:</h2>
+			<p>{{ comment }}</p> 
+		</div>
+	</div>
+	<br>
+</div>
+
+<div id="rsq_width" style="width: 80%; padding: 50px; height: 700px"></div> <!--sqrt_IC plot -->
+
+<div style="display: flex; width: 100%; height: 500px">
+	<div id="table1" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+			{% for row in pcmrs_data['table1'] %}
+        		<tr>
+        			{% for data in row %}
+            			<td>{{ data }}</td>
+            		{% endfor %}
+            </tr>	
+         {% endfor %}	
+		</table>
+	</div>
+	<div id="table2" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+        {% for row in pcmrs_data['table2'] %}
+        		<tr>
+        			{% for data in row %}
+            		<td>{{ data }}</td>
+            	{% endfor %}
+            </tr>	
+        {% endfor %}
+		</table>
+	</div>
+</div>
+
+<div style="display: flex; width: 100%; height: 500px">
+	<div id="table3" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+        {% for row in pcmrs_data['table3'] %}
+        		<tr>
+        			{% for data in row %}
+            		<td>{{ data }}</td>
+            	{% endfor %}
+            </tr>	
+        {% endfor %}
+		</table>
+	</div>
+	<div id="table4" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+        {% for row in pcmrs_data['table4'] %}
+        		<tr>
+        			{% for data in row %}
+            		<td>{{ data }}</td>
+            	{% endfor %}
+            </tr>	
+        {% endfor %}
+		</table>
+	</div>
+</div>
+
+<div style="display: flex; width: 100%; height: 500px">
+	<div id="table5" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+        {% for row in pcmrs_data['table5'] %}
+            <tr>
+        			{% for data in row %}
+            		<td>{{ data }}</td>
+            	{% endfor %}
+            </tr>	
+        {% endfor %}
+		</table>
+	</div>
+	<div id="table6" style="width: 50%; padding: 50px">
+		<table id="jc-act-table" class="table table-bordered table-striped">
+			<tr>
+				<th>w x L</th>
+				<th>Vias</th>
+				<th>R (4K)</th>
+				<th>#sq</th>
+				<th>Rsq</th>
+			</tr>
+        {% for row in pcmrs_data['table2'] %}
+        		<tr>
+        			{% for data in row %}
+            		<td>{{ data }}</td>
+            	{% endfor %}
+            </tr>	
+        {% endfor %}
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+
+    var Javi_theme = { //Theme used for the plot
+    colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4'],
+    chart: {
+        backgroundColor: {
+            linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+            stops: [
+                [0, 'rgb(255, 255, 255)'],
+                [1, 'rgb(240, 240, 255)']
+            ]
+        },
+        borderWidth: 2,
+        plotBackgroundColor: 'rgba(255, 255, 255, .9)',
+        plotShadow: true,
+        plotBorderWidth: 1
+    },
+    title: {
+        style: {
+            color: '#000',
+            font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+        }
+    },
+    subtitle: {
+        style: {
+            color: '#666666',
+            font: 'bold 12px "Trebuchet MS", Verdana, sans-serif'
+        }
+    },
+    xAxis: {
+        gridLineWidth: 1,
+        lineColor: '#000',
+        tickColor: '#000',
+        labels: {
+            style: {
+                color: '#000',
+                font: '11px Trebuchet MS, Verdana, sans-serif'
+            }
+        },
+        title: {
+            style: {
+                color: '#333',
+                fontWeight: 'bold',
+                fontSize: '12px',
+                fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+
+            }
+        }
+    },
+    yAxis: {
+        minorTickInterval: 'auto',
+        lineColor: '#000',
+        lineWidth: 1,
+        tickWidth: 1,
+        tickColor: '#000',
+        labels: {
+            style: {
+                color: '#000',
+                font: '11px Trebuchet MS, Verdana, sans-serif'
+            }
+        },
+        title: {
+            style: {
+                color: '#333',
+                fontWeight: 'bold',
+                fontSize: '12px',
+                fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+            }
+        }
+    },
+    legend: {
+        itemStyle: {
+            font: '9pt Trebuchet MS, Verdana, sans-serif',
+            color: 'black'
+
+        },
+        itemHoverStyle: {
+            color: '#039'
+        },
+        itemHiddenStyle: {
+            color: 'gray'
+        }
+    },
+    labels: {
+        style: {
+            color: '#99b'
+        }
+    },
+
+    navigation: {
+        buttonOptions: {
+            theme: {
+                stroke: '#CCCCCC'
+            }
+        }
+    }
+};
+
+function crit_points_plot(location, title, axis_title, x_axis_title) { //Used for the Ic plot
+
+        Highcharts.setOptions(Javi_theme); //Use Javi_theme for the chart
+
+        var myChart = Highcharts.chart(location, { //create the chart with all the correct specifications
+            chart: {
+                type: 'line',
+                zoomType: 'xy',
+                marginBottom: '70'
+            },
+            title: {
+                text: title
+            },
+            subtitle: {
+                text: 'Click and drag to zoom in'
+            },
+            xAxis: {
+                gridLineWidth: 1,
+                title: {
+                    text: x_axis_title
+                }
+            },
+            yAxis: {
+                title: {
+                    text: axis_title
+                },
+                minorGridLineWidth: 1
+            },
+            legend: {
+              layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                title: {
+                  text: 'Chip<br><span style="font-size: 9px; font-weight: normal">Hover to highlight</span>'
+                }
+            },
+            plotOptions: {
+                marker: {
+                    radius: 5
+                },
+                series: {
+                    stickyTracking: false,
+                    point: {
+                        events: { //Defines the highlighting/unhighlighting of a chip when hovering over it
+                            mouseOver: function () {
+                                var chart = this.series.chart;
+                                if (this.series.name.indexOf('no') === -1) {
+                                    highlightChip(this.series.name, this.series.color)
+                                }
+                            },
+                            mouseOut: function () {
+                                if (this.series.name.indexOf('no') === -1) {
+                                    unhighlightChip(this.series.name)
+                                }
+                            },
+                        }
+                    }
+                },
+                tooltip: {
+                    snap: 0
+                }
+            },
+            tooltip: { //Defines the dialog box when hovering over individual points
+                 formatter: function () {
+                     if (this.series.options.customInfo !== undefined) {
+                         return this.series.options.customInfo
+                     }
+                     var units = "";
+                     var val = Math.round(this.point.y * 1000) / 1000;
+                     if (title === "IC") {
+                         units = "mA";
+                         val = Math.round(this.point.y * 1000 * 1000) / 1000;
+                     }
+                     if (title === "Rn") {
+                         units = "Ohms";
+                         val = this.point.y;
+                     }
+                     if (title === "Ic*Rn") {
+                         units = "uV"
+                     }
+
+                     if (this.series.name.indexOf('no') === -1) {
+                         return '<b>' + 'random string' + '</b>'
+                     }
+                     else {
+                         return '<b>' + this.series.name.substr(0,this.series.name.indexOf('_no')) + '</b>' +
+                                 '<br>' + 'Average: ' + val
+                     }
+                    }
+            }
+        });
+
+        return myChart
+    }
+
+
+// called when page loads, heavy lifting done here. This is where the plot objects are generated
+    $(document).ready(function () {
+        // from flask
+        var data_json = {{ pcmrs_data|tojson }} //data json with all of the data coming from the view function
+        console.log(data_json)
+        
+        var tables = Object.keys(data_json);
+
+        //Generate the blank chart
+        var Rsq_vs_width = crit_points_plot('rsq_width', 'Rsq vs Nominal Width', 'Rsq (Ohms)', 'Nominal Width (um)');
+        
+        data = []
+        
+        for(var i = 0; i <= 5; i++)
+        {
+            pairs = [];
+            
+            for(var j = 0; j <= 8; j++)
+            {
+                //pair.push(parseFloat(data_json[tables[i]][j][0].substring(0,2).replace("x","")))
+                //pair.push(data_json[tables[i]][j][4]);
+                pair = [parseFloat(data_json[tables[i]][j][0].substring(0,2).replace("x","")),data_json[tables[i]][j][4]]
+                pairs.push(pair)
+            }
+            data.push(pairs)
+        }
+        console.log(data);
+        
+        for(var i = 0; i <= 5; i++)
+        {
+            Rsq_vs_width.addSeries({
+                name: "L = " + data_json[tables[i]][0][0].substring(4,8),
+                data: data[i],
+                marker: {
+                            symbol: "circle"
+                         }
+            });
+        }
+
+    }
+
+
+        //The following is Javascript for animating the charts that I'm not going to pretend like I understand
+        (function (Highcharts) {
+        var each = Highcharts.each;
+
+        Highcharts.wrap(Highcharts.Legend.prototype, 'renderItem', function (proceed, item) {
+
+            proceed.call(this, item);
+
+
+            var series = this.chart.series,
+                element = item.legendGroup.element;
+
+            element.onmouseover = function () {
+                if (item.chart.title.textStr.indexOf("IC") !== -1 || item.chart.title.textStr.indexOf("Rn") !== -1)
+                {
+                    highlightChip(item.name, item.color);
+                    each(series, function (seriesItem) {
+//                        console.log(item.name);
+//                        console.log(seriesItem.name);
+                        if (seriesItem.name.indexOf(item.name) === -1) {
+                            each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 0.05);
+                            });
+                        }
+                    });
+                }
+            }
+            element.onmouseout = function () {
+                if (item.chart.title.textStr.indexOf("IC") !== -1 || item.chart.title.textStr.indexOf("Rn") !== -1) 
+                {
+                    unhighlightChip(item.name);
+                    each(series, function (seriesItem) {
+                        if (seriesItem.name.indexOf(item.name) === -1) {
+                            each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 1);
+                            });
+                        }
+                    });
+                }
+            }
+            // didnt seem to work
+            element.onclick = function () {
+                each(series, function(seriesItem) {
+                    if (seriesItem.name.indexOf(item.name)!== -1) {
+                        seriesItem.setVisible();
+                        each(['group', 'markerGroup'], function (group) {
+                                seriesItem[group].attr('opacity', 1);
+                            });
+                    }
+                })
+            }
+
+        });
+    }(Highcharts))
+
+    );
+
+
+
+</script>
+
+</html>

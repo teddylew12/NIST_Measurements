@@ -1,0 +1,70 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chip Report</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+</head>
+
+</head>
+<div class="container theme-showcase" role="main">
+	<div class="well">
+		<h1>Chip Report for {{ chip.name }}</h1>
+		<form class="form-inline" method="POST" action="{{ url_for('chip_report') }}" name="chip_selection">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">Change chip:</span>
+					<select name="chip_select" class="selectpicker form-control">
+						{% for c in other_chips %}
+						{% if c.id == chip.id %}
+						<option value={{ c.id }} selected="selected">{{ c.name }}</option>
+						{% else %}
+						<option value={{ c.id }}>{{ c.name }}</option>
+						{% endif %}
+						{% endfor %}
+					</select>
+				</div>
+				<button type="submit" class="btn btn-default" name="Go">Go</button>
+			</div>
+		</form>
+	</div>
+
+	<div style="display: flex">
+		<div id="loader"></div>
+		<div style="width: 50%">
+			<h2>Design: {{ design }}</h2>
+			<h2>Wafer Date: {{ chip.wafer.date }}</h2>
+			<h2>Comment:</h2>
+			<p>{{ comment }}</p> 
+		</div>
+	</div>
+	<br>
+	<div style="display: flex; width: 100%; height: 600px">
+		<div id="jc-info" style="width: 100%; padding: 0px">
+			<table id="jc-act-table" class="table table-bordered table-striped">
+				<tr>
+					<th>Device</th>
+					<th>I<sub>c</sub> (mA)</th>
+					<th>R<sub>n</sub> (ohms)</th>
+					<th>I<sub>flux</sub> Period (mA)</th>
+					<th>V<sub>resonance step</sub> (V)</th>		
+				</tr>
+            {% for meas in SQUID_data %}
+				<tr>
+					<td>{{ meas.device_name }}</td>
+					<td>{{ meas.Ic }}</td>
+					<td>{{ meas.Rn }}</td>
+					<td>{{ meas.Period }}</td>
+					<td>{{ meas.Vresstep }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+</div>
