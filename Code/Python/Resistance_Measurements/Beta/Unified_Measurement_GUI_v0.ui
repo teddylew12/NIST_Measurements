@@ -1,0 +1,2807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>1000</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Measurement</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QComboBox" name="Wafer">
+          <item>
+           <property name="text">
+            <string>Wafer</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="Chip">
+          <item>
+           <property name="text">
+            <string>Chip</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QComboBox" name="Device">
+        <item>
+         <property name="text">
+          <string>Device</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <layout class="QGridLayout" name="gridLayout_11"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="tabPosition">
+         <enum>QTabWidget::North</enum>
+        </property>
+        <property name="currentIndex">
+         <number>9</number>
+        </property>
+        <property name="tabBarAutoHide">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="pcm3afunctions">
+         <attribute name="title">
+          <string>PCM3A Functions</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="refreshButton">
+              <property name="text">
+               <string>Refresh DB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableWidget" name="deviceWidget"/>
+            </item>
+            <item row="5" column="0" colspan="4">
+             <widget class="Line" name="line_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0" colspan="4">
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0" colspan="4">
+             <widget class="Line" name="line_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0" rowspan="2">
+             <widget class="QPushButton" name="stopButton">
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1" colspan="2">
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>237</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="dataButton">
+              <property name="text">
+               <string>View Wafer Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QPushButton" name="continuityMeasure">
+                <property name="text">
+                 <string>Continuity</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="ivMeasure">
+                <property name="text">
+                 <string>I-V</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="rnMeasure">
+                <property name="text">
+                 <string>Rn</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="10" column="0" colspan="4">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Secondary Functions: data will not be saved to DB</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QPushButton" name="coldMeasure">
+                <property name="text">
+                 <string>Cold</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="warmMeasure">
+                <property name="text">
+                 <string>Warm</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="7" column="0" colspan="4">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Main Functions: save data to DB</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="3">
+             <widget class="QLineEdit" name="status">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: rgb(0, 255, 0)</string>
+              </property>
+              <property name="text">
+               <string>Ready</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="closeButton">
+              <property name="text">
+               <string>Close All Graphs</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QPushButton" name="bothMeasure">
+              <property name="text">
+               <string>Full Test</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QRadioButton" name="selectAll">
+              <property name="layoutDirection">
+               <enum>Qt::RightToLeft</enum>
+              </property>
+              <property name="text">
+               <string>All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QRadioButton" name="highDensity">
+              <property name="text">
+               <string>High Density Around Ic</string>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" rowspan="2" colspan="2">
+             <widget class="QLabel" name="exist_warning">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 0, 0); background: rgb(255, 255, 0); font-style: bold</string>
+              </property>
+              <property name="text">
+               <string>Measurements Exist for Chip</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pcm3bfunctions">
+         <attribute name="title">
+          <string>PCM3B Functions</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="dataButton_3b">
+              <property name="text">
+               <string>View Wafer Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2" colspan="2">
+             <widget class="QPushButton" name="warmMeasure_3b">
+              <property name="text">
+               <string>Warm</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QPushButton" name="cold4k">
+                <property name="text">
+                 <string>Cold 4K</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cold10k">
+                <property name="text">
+                 <string>Cold 10K</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="2" colspan="2">
+             <widget class="QPushButton" name="closeButton_3b">
+              <property name="text">
+               <string>Close All Graphs</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" rowspan="2" colspan="2">
+             <widget class="QLabel" name="exist_warning_3b">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 0, 0); background: rgb(255, 255, 0); font-style: bold</string>
+              </property>
+              <property name="text">
+               <string>Measurements Exist for Chip</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="refreshButton_3b">
+              <property name="text">
+               <string>Refresh DB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="4">
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="3">
+             <widget class="QLineEdit" name="status_3b">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: rgb(0, 255, 0)</string>
+              </property>
+              <property name="text">
+               <string>Ready</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0" colspan="2">
+             <widget class="QPushButton" name="resistancetempsave">
+              <property name="text">
+               <string>Resistance Vs. Temp (Manual) With Save</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0" colspan="4">
+             <widget class="Line" name="line_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QPushButton" name="resistancetemp">
+                <property name="text">
+                 <string>Resistance Vs. Temperature (Manual)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="resistancetempheater">
+                <property name="text">
+                 <string>Resistance Vs. Temperature (Heater)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="resistancetime">
+                <property name="text">
+                 <string>Resistance Vs. Time </string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableWidget" name="deviceWidget_3b"/>
+            </item>
+            <item row="8" column="0" colspan="4">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Main Functions: save data to DB</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="4">
+             <widget class="Line" name="line_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1" colspan="2">
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>237</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="14" column="0" rowspan="2">
+             <widget class="QPushButton" name="stopButton_3b">
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QRadioButton" name="selectAll_3b">
+              <property name="layoutDirection">
+               <enum>Qt::RightToLeft</enum>
+              </property>
+              <property name="text">
+               <string>All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0" colspan="4">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Secondary Functions: data will not be saved to DB</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="0" colspan="4">
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>Wiring for SQUID Devices:  SQUID1 - I:C7-C20  V: C8-C21  Flux:A1-A2,  SQUID2 - I:C10-C22  V:C11-C23  Flux:C9-C12, SQUID3 -  I: D2-D16  V: D3-D17  Flux: D1-D4</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pcmrs">
+         <attribute name="title">
+          <string>PCMRS + Other Ftcns</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_9">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item row="11" column="0" colspan="4">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RS Functions: 4K Saves to Database, Continuity Does Not&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0" colspan="4">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;More Functionality to Be Added as More Methods Are Needed!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" colspan="2">
+             <widget class="QPushButton" name="closeButton_rs">
+              <property name="text">
+               <string>Close All Graphs</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="0" rowspan="2">
+             <widget class="QPushButton" name="stopButton_rs">
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1" colspan="2">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>237</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="dataButton_rs">
+              <property name="text">
+               <string>View Wafer Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QPushButton" name="tbd2">
+                <property name="text">
+                 <string>TBD</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="temptimetune">
+                <property name="text">
+                 <string>Temp Vs Time-PID Tuning</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tbd3">
+                <property name="text">
+                 <string>TBD</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="5" column="0" colspan="4">
+             <widget class="Line" name="line_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="refreshButton_rs">
+              <property name="text">
+               <string>Refresh DB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QPushButton" name="rs4k">
+                <property name="text">
+                 <string>RS 4K</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="rsroomtemp">
+                <property name="text">
+                 <string>RS Continuity</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="14" column="3">
+             <widget class="QLineEdit" name="status_rs">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: rgb(0, 255, 0)</string>
+              </property>
+              <property name="text">
+               <string>Ready</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="4">
+             <widget class="Line" name="line_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableWidget" name="deviceWidget_rs"/>
+            </item>
+            <item row="12" column="0" colspan="4">
+             <widget class="Line" name="line_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2" colspan="2">
+             <widget class="QPushButton" name="tbd5">
+              <property name="text">
+               <string>TBD</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0" colspan="2">
+             <widget class="QPushButton" name="tbd4">
+              <property name="text">
+               <string>TBD</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" rowspan="2" colspan="2">
+             <widget class="QLabel" name="exist_warning_rs">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 0, 0); background: rgb(255, 255, 0); font-style: bold</string>
+              </property>
+              <property name="text">
+               <string>Measurements Exist for Chip</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QRadioButton" name="selectAll_rs">
+              <property name="layoutDirection">
+               <enum>Qt::RightToLeft</enum>
+              </property>
+              <property name="text">
+               <string>All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="squid_tab">
+         <attribute name="title">
+          <string>SQUID Test</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_13">
+          <item row="0" column="1" colspan="9">
+           <widget class="QPushButton" name="refreshButton_SQUID">
+            <property name="text">
+             <string>Refresh DB</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="10" colspan="9">
+           <widget class="QPushButton" name="closeButton_SQUID">
+            <property name="text">
+             <string>Close All Graphs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="9">
+           <widget class="QLabel" name="exist_warning_SQUID">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 0, 0); background: rgb(255, 255, 0); font-style: bold</string>
+            </property>
+            <property name="text">
+             <string>Measurements Exist for Chip</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="16" colspan="2">
+           <widget class="QRadioButton" name="selectAll_SQUID">
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="18">
+           <widget class="QPushButton" name="dataButton_SQUID">
+            <property name="text">
+             <string>View Wafer Data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="18">
+           <widget class="QTableWidget" name="deviceWidget_SQUID"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="Line" name="line_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="18">
+           <widget class="QPushButton" name="full_test_SQUID">
+            <property name="text">
+             <string>Full Test</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="label_62">
+            <property name="text">
+             <string>Minimum Ibias:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLineEdit" name="min_Ibias_IV_Iflux0"/>
+          </item>
+          <item row="4" column="3">
+           <widget class="QLabel" name="label_65">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="4">
+           <widget class="QLabel" name="label_63">
+            <property name="text">
+             <string>Maximum Ibias:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QLineEdit" name="max_Ibias_IV_Iflux0"/>
+          </item>
+          <item row="4" column="6">
+           <widget class="QLabel" name="label_66">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="7">
+           <widget class="QLabel" name="label_64">
+            <property name="text">
+             <string>Step:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="8" colspan="2">
+           <widget class="QLineEdit" name="step_Ibias_IV_Iflux0"/>
+          </item>
+          <item row="4" column="10">
+           <widget class="QLabel" name="label_67">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="16">
+           <widget class="QRadioButton" name="save_IV_Iflux0">
+            <property name="text">
+             <string>Save?</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="17" colspan="2">
+           <widget class="QPushButton" name="IV_SQUID_Iflux0">
+            <property name="text">
+             <string>I-V with Iflux = 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="18">
+           <widget class="Line" name="line_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLabel" name="label_40">
+            <property name="text">
+             <string>Minimum Iflux:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QLineEdit" name="min_Iflux_periodicity"/>
+          </item>
+          <item row="6" column="3">
+           <widget class="QLabel" name="label_41">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="4">
+           <widget class="QLabel" name="label_42">
+            <property name="text">
+             <string>Maximum Iflux:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="5">
+           <widget class="QLineEdit" name="max_Iflux_periodicity"/>
+          </item>
+          <item row="6" column="6">
+           <widget class="QLabel" name="label_43">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="7">
+           <widget class="QLabel" name="label_44">
+            <property name="text">
+             <string>Step:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="8" colspan="2">
+           <widget class="QLineEdit" name="step_Iflux_periodicity"/>
+          </item>
+          <item row="6" column="10">
+           <widget class="QLabel" name="label_45">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="12">
+           <widget class="QLabel" name="label_46">
+            <property name="text">
+             <string>Ibias:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="13" colspan="2">
+           <widget class="QLineEdit" name="ibias_periodicity"/>
+          </item>
+          <item row="6" column="15">
+           <widget class="QLabel" name="label_47">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="16">
+           <widget class="QRadioButton" name="save_periodicity">
+            <property name="text">
+             <string>Save?</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="17" colspan="2">
+           <widget class="QPushButton" name="periodicity">
+            <property name="text">
+             <string>Periodicity Test</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0" colspan="19">
+           <widget class="Line" name="line_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLabel" name="label_48">
+            <property name="text">
+             <string>Minimum Ibias:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
+           <widget class="QLineEdit" name="min_Ibias_IV"/>
+          </item>
+          <item row="8" column="3">
+           <widget class="QLabel" name="label_49">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="4">
+           <widget class="QLabel" name="label_50">
+            <property name="text">
+             <string>Maximum Ibias:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="5">
+           <widget class="QLineEdit" name="max_Ibias_IV"/>
+          </item>
+          <item row="8" column="6">
+           <widget class="QLabel" name="label_51">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="7" colspan="2">
+           <widget class="QLabel" name="label_52">
+            <property name="text">
+             <string>Ibias Step:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="9" colspan="2">
+           <widget class="QLineEdit" name="step_Ibias_IV"/>
+          </item>
+          <item row="8" column="11">
+           <widget class="QLabel" name="label_53">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="12" colspan="2">
+           <widget class="QRadioButton" name="down_Ibias_IV">
+            <property name="text">
+             <string>Down?</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="14" colspan="5">
+           <widget class="QPushButton" name="IV_SQUID">
+            <property name="text">
+             <string>I-V for different Iflux</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QLabel" name="label_54">
+            <property name="text">
+             <string>Minimum Iflux:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="2">
+           <widget class="QLineEdit" name="min_Iflux_IV"/>
+          </item>
+          <item row="9" column="3">
+           <widget class="QLabel" name="label_55">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="4">
+           <widget class="QLabel" name="label_56">
+            <property name="text">
+             <string>Maximum Iflux:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="5">
+           <widget class="QLineEdit" name="max_Iflux_IV"/>
+          </item>
+          <item row="9" column="6">
+           <widget class="QLabel" name="label_57">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="7" colspan="2">
+           <widget class="QLabel" name="label_58">
+            <property name="text">
+             <string>Iflux Step:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="9" colspan="2">
+           <widget class="QLineEdit" name="step_Iflux_IV"/>
+          </item>
+          <item row="9" column="11">
+           <widget class="QLabel" name="label_59">
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="12" colspan="2">
+           <widget class="QRadioButton" name="save_IV">
+            <property name="text">
+             <string>Save?</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1" colspan="18">
+           <widget class="Line" name="line_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1" rowspan="2" colspan="2">
+           <widget class="QPushButton" name="stopButton_SQUID">
+            <property name="text">
+             <string>Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="17" colspan="2">
+           <widget class="QLineEdit" name="status_SQUID">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: rgb(0, 255, 0)</string>
+            </property>
+            <property name="text">
+             <string>Ready</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="graphs">
+         <attribute name="title">
+          <string>Graphs</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QRadioButton" name="allOption">
+                <property name="text">
+                 <string>Plot Ic From Each Device for all Chips</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="singleOption">
+                <property name="text">
+                 <string>Plot IV Curve for Single Device</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="plotButton">
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="PlotWidget" name="graphicsView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fix_rn">
+         <attribute name="title">
+          <string>Fix Rn</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="PlotWidget" name="graphicsView_Rn"/>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="title">
+               <string>Device Info</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QLabel" name="nameLabel">
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="numLabel">
+                 <property name="text">
+                  <string>Num JJs:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="sizeLabel">
+                 <property name="text">
+                  <string>JJ Size:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="current_Rn">
+                 <property name="text">
+                  <string>Current Rn:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="current_Imax">
+                 <property name="text">
+                  <string>Current Imax:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Selected Rn</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="rnEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Selected Imax</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="imaxEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="saveRnButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Save to DB</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="SQUIDWARNING">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>51</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(0, 0, 0); background: rgb(255, 255, 0); font-style: bold</string>
+              </property>
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;USING SQUID&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>30</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>First two clicks determine Rn, third click determines Imax, 'Clear' resets</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearRnButton">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fix_tc">
+         <attribute name="title">
+          <string>Fix Tc</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_14">
+          <item row="0" column="0">
+           <widget class="PlotWidget" name="graphicsView_tc"/>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="title">
+               <string>Device Info</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="waferName">
+                 <property name="text">
+                  <string>Wafer:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="chipName">
+                 <property name="text">
+                  <string>Chip:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="deviceName">
+                 <property name="text">
+                  <string>Device</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="current_Tc">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current Tc:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>Selected Tc</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="tcEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="saveTcButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Save to DB</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearTcButton">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fix_imax">
+         <attribute name="title">
+          <string>Fix Imax</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_15">
+          <item row="0" column="0">
+           <widget class="PlotWidget" name="graphicsView_Imax"/>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="title">
+               <string>Device Info</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="waferName_Imax">
+                 <property name="text">
+                  <string>Wafer:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="chipName_Imax">
+                 <property name="text">
+                  <string>Chip:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="deviceName_Imax">
+                 <property name="text">
+                  <string>Device:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="current_Imax_2">
+                 <property name="text">
+                  <string>Current Imax:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Selected Imax</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="imaxEdit_via">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="saveImaxButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Save to DB</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>First click sets Imax, 'Clear' resets</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearImaxButton">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fix_LC">
+         <attribute name="title">
+          <string>Fix LC</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_16">
+          <item row="0" column="0">
+           <widget class="PlotWidget" name="graphicsView_LC"/>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="QGroupBox" name="groupBox_6">
+              <property name="title">
+               <string>Device Info</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_11">
+               <item>
+                <widget class="QLabel" name="device_SQ">
+                 <property name="text">
+                  <string>Device:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="current_Vresstep">
+                 <property name="text">
+                  <string>Current Vresstep:</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_39">
+              <property name="text">
+               <string>Selected Vresstep</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="LcEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="saveLCButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Save to DB</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_61">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Click determines the position of Vresstep</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearLCButton">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="fix_Ic">
+         <attribute name="title">
+          <string>Fix IC</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_17">
+          <item row="0" column="0" rowspan="13">
+           <widget class="PlotWidget" name="graphicsView_Ic">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>780</width>
+              <height>841</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox_7">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>160</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Device Info</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_13">
+             <item>
+              <widget class="QLabel" name="nameLabel_2">
+               <property name="text">
+                <string>Name:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="numLabel_2">
+               <property name="text">
+                <string>Num JJs:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="sizeLabel_2">
+               <property name="text">
+                <string>JJ Size:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="current_Ic_Neg">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current Ic Neg:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="current_Ic_Pos">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current Ic Pos:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="current_Ic_Ret_Pos">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current Ic Ret Pos:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="current_Ic_Ret_Neg">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current Ic Ret Neg:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_60">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selected Ic Negative&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="Select_Ic_Neg">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label_68">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selected Ic Positive&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="Select_Ic_Pos">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="label_70">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;Selected Ic Return Positive&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="Select_Ic_Ret_Pos">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLabel" name="label_71">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;Selected Ic Return Negative&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLineEdit" name="Select_Ic_Ret_Neg">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QPushButton" name="saveIcButton">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>180</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Save to DB</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <spacer name="verticalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>381</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLabel" name="label_69">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>First two clicks determine Rn, third click determines Imax, 'Clear' resets</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QPushButton" name="clearICButton">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="ReportTab">
+         <attribute name="title">
+          <string>Reports</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="deviceGroup">
+            <item>
+             <property name="text">
+              <string>Device Group</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QPushButton" name="icReportButton">
+              <property name="text">
+               <string>√Ic vs Radius</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="rnReportButton">
+              <property name="text">
+               <string>1/√Rn vs Radius</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="productReportButton">
+              <property name="text">
+               <string>(Ic*Rn) vs Device</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="1" rowspan="2">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Intercept (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="interceptEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Slope (A/m)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="slopeEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Slope R^2</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="r2Edit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>600</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="PlotWidget" name="graphicsView_Reports"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="PIDTune">
+         <attribute name="title">
+          <string>PID Tuning</string>
+         </attribute>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>491</width>
+            <height>291</height>
+           </rect>
+          </property>
+          <property name="title">
+           <string>Controller Output</string>
+          </property>
+          <widget class="QLabel" name="label_17">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Temperature (K):</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_18">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>50</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Temperature (C):</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_19">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>80</y>
+             <width>161</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Temperature Setpoint (K):</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_20">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>110</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Heater range:</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_21">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>140</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Heater output:</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_22">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>170</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Manual output: </string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_23">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>200</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>P (proportional):</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_24">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>230</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>I (integral):</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_25">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>260</y>
+             <width>131</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>D (derivative)</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="tempK_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>20</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="tempC_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>50</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="setpoint_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>80</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="range_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>110</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="output_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>140</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="manual_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>170</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="p_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>200</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="i_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>230</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="d_disp">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>260</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="update_values">
+           <property name="geometry">
+            <rect>
+             <x>300</x>
+             <y>20</y>
+             <width>181</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_38">
+           <property name="geometry">
+            <rect>
+             <x>290</x>
+             <y>140</y>
+             <width>31</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>% of</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="range_disp2">
+           <property name="geometry">
+            <rect>
+             <x>320</x>
+             <y>140</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QGroupBox" name="groupBox_5">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>300</y>
+            <width>651</width>
+            <height>241</height>
+           </rect>
+          </property>
+          <property name="title">
+           <string>Set Temperature Controller</string>
+          </property>
+          <widget class="QLabel" name="label_26">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>191</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Temperature Setpoint (K)   [4.5 - 280]</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_27">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>50</y>
+             <width>191</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>P (proportional)                  [0.1 - 1000]</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_28">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>80</y>
+             <width>191</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>I (integral)                          [0.1 - 1000]</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_29">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>110</y>
+             <width>191</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>D (derivative)                     [0 - 200]</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_30">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>140</y>
+             <width>191</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Manual Output                   [0.0 - 100.0]</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_31">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>170</y>
+             <width>71</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Heater Range</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="send_values_button">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>200</y>
+             <width>211</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Send All Values to Controller</string>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="range_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>170</y>
+             <width>111</width>
+             <height>22</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="setpoint_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>20</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="p_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>50</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="i_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>80</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="d_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>110</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="manual_choose">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>140</y>
+             <width>113</width>
+             <height>20</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_32">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>20</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Suggested Values</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_33">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>50</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1-3</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_34">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>80</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1000</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_35">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>110</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_36">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>140</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_37">
+           <property name="geometry">
+            <rect>
+             <x>370</x>
+             <y>170</y>
+             <width>101</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Medium - 5W</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="update_tempsetpoint">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>20</y>
+             <width>181</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="update_pid">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>110</y>
+             <width>181</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="update_manual">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>140</y>
+             <width>181</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="update_range">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>170</y>
+             <width>181</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QPushButton" name="temp_vs_time_button">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>550</y>
+            <width>281</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Continous Temperature vs. Time</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="stopButton_PID">
+          <property name="geometry">
+           <rect>
+            <x>310</x>
+            <y>590</y>
+            <width>121</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="tempandres_vs_time_button">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>590</y>
+            <width>281</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Continous Temperature and Reistance vs. Time</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1000</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuMeasurement">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="actionHello"/>
+   </widget>
+   <addaction name="menuMeasurement"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionHello">
+   <property name="text">
+    <string>Test2</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header location="global">pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
