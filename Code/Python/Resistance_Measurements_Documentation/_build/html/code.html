@@ -1,0 +1,2878 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Main Functions &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="SOP" href="sop.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sop.html" title="SOP"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p><strong>*
+code
+*</strong></p>
+<div class="section" id="main-functions">
+<span id="code-home"></span><h1>Main Functions<a class="headerlink" href="#main-functions" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Measurement_Functions"></span><p>Created on Mon Jul 10 15:51:37 2017</p>
+<p>&#64;author: Soroush + Javi + Ted</p>
+<dl class="function">
+<dt id="Measurement_Functions.check_connections">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">check_connections</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#check_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.check_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply check that there are no opens. Takes a current sweep from 0 to 3mA
+saves images and raw numbers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Measurement_Functions.copy_design">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">copy_design</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#copy_design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.copy_design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies a design, allowing mass copying of device</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Measurement_Functions.measure_JJs_Ic">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">measure_JJs_Ic</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em>, <em>optionalIc=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#measure_JJs_Ic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.measure_JJs_Ic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes just an I-V curve for the JJs, saves images but does not add to the
+database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+<li><strong>optionalIC</strong> – Optional input Ic</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Calls:</p>
+<blockquote>
+<div>-Measure_Ic-get_Ic_Iret_and_save</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Measurement_Functions.measure_JJs_Rn">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">measure_JJs_Rn</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#measure_JJs_Rn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.measure_JJs_Rn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes just the normal resistance sweep for the JJs, saves images but does 
+not add to the database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Calls:</p>
+<blockquote>
+<div>-Measure_Rn-Measure_Rn_Imax</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Measurement_Functions.measure_PCM_chip_cold">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">measure_PCM_chip_cold</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em>, <em>optionalic=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#measure_PCM_chip_cold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.measure_PCM_chip_cold" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function to call when PCM chip is fully dunked. Will 
+measure and save the ICs of all the Junctions, then the resistances of the
+resistor arrays and vias, then the normal resistance of the junctions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+<li><strong>optionalIC</strong> – Optional input Ic</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">IV and RN graphs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_v3-coldmeasure</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Get_Ic_Iret_and_save</p>
+<p>-get_resistance_arrays</p>
+<p>-get_resistance_Via</p>
+<p>-save_Resistance_Measurements_cold</p>
+<p>-save_Via_Measurements_cold</p>
+<p>-get_Rn_Imax_and_save</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Measurement_Functions.measure_PCM_chip_warm">
+<code class="descclassname">Measurement_Functions.</code><code class="descname">measure_PCM_chip_warm</code><span class="sig-paren">(</span><em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_Functions.html#measure_PCM_chip_warm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_Functions.measure_PCM_chip_warm" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function to call when PCM chip hasn’t been dunked. Will 
+measure the continuity of all the Junctions, then the resistances of the
+resistor arrays and vias, and save the resistances to the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">funkygraph2-array of abnormal graphs</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Continuity Graphs, IV from 0 mA to 300 mA</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_v3-warmmeasure</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Get_Resistance</p>
+<p>-get_resistance_arrays</p>
+<p>-get_resistance_Via</p>
+<p>-save_Resistance_Measurements_warm</p>
+<p>-save_Via_Measurements_warm</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="communicating-with-instruments">
+<h1>Communicating With Instruments<a class="headerlink" href="#communicating-with-instruments" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Visa_Functions"></span><p>Created on Thu May 25 10:15:13 2017
+–This purpose of this file is to have basic function library that all the different scripts can use 
+&#64;author: JPulecio</p>
+<dl class="function">
+<dt id="Visa_Functions.close_channel">
+<code class="descclassname">Visa_Functions.</code><code class="descname">close_channel</code><span class="sig-paren">(</span><em>Switch</em>, <em>card</em>, <em>channel</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#close_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.close_channel" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>close switch channel</p>
+<p>The procedure for changing channels is:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>set output current to zero</li>
+<li>close the desired line</li>
+<li>open the shorted line</li>
+</ol>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param Switch:</th><td class="field-body">Switch Address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param Card:</th><td class="field-body">Targeted Card Address</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param channel:</th><td class="field-body">Current Targeted Channel</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Iv_Curve_V2</p>
+<p>-Visa Functions</p>
+<p>-Resisitance Curve</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.close_short">
+<code class="descclassname">Visa_Functions.</code><code class="descname">close_short</code><span class="sig-paren">(</span><em>Switch</em>, <em>card</em>, <em>shorts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#close_short"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.close_short" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes short</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Switch</strong> – Switch Address</li>
+<li><strong>Card</strong> – Targeted Card Address</li>
+<li><strong>shorts</strong> – Array of Shorts</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Resistance Curve</p>
+<p>-Iv_Curve_v2</p>
+</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div>-close_channel()</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.get_current">
+<code class="descclassname">Visa_Functions.</code><code class="descname">get_current</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#get_current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.get_current" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Opens current source</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Current Source Address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.get_switch">
+<code class="descclassname">Visa_Functions.</code><code class="descname">get_switch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#get_switch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.get_switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens switch</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Switch Address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.get_voltage">
+<code class="descclassname">Visa_Functions.</code><code class="descname">get_voltage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#get_voltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.get_voltage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens Voltmeter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Voltmeter Address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.intialize_current_yoko">
+<code class="descclassname">Visa_Functions.</code><code class="descname">intialize_current_yoko</code><span class="sig-paren">(</span><em>CurrentSource</em>, <em>Irange</em>, <em>compliance_voltage</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#intialize_current_yoko"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.intialize_current_yoko" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes current source</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>CurrentSource</strong> – Address of current source</li>
+<li><strong>Irange</strong> – Current range</li>
+<li><strong>compliance_voltage</strong> – compliance_voltage</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Resistance Curve</p>
+<p>-Visa Functions</p>
+<p>-Iv_Curve_v2</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.intialize_switch_all">
+<code class="descclassname">Visa_Functions.</code><code class="descname">intialize_switch_all</code><span class="sig-paren">(</span><em>Switch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#intialize_switch_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.intialize_switch_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialized Switch</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Switch</strong> – Switch Address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Switch the Switch Address</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Resistance Curve</p>
+<p>-Iv_Curve_v2</p>
+</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div>-not_initialized(Switch)</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.intialize_voltage">
+<code class="descclassname">Visa_Functions.</code><code class="descname">intialize_voltage</code><span class="sig-paren">(</span><em>Voltmeter</em>, <em>nplc</em>, <em>Vrange</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#intialize_voltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.intialize_voltage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes voltmeter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Voltmeter</strong> – The Voltmeter machine address</li>
+<li><strong>NPLC</strong> – Number of Power Line Cycles to average over</li>
+<li><strong>Vrange</strong> – Voltage Range</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Iv_Curve_V2</p>
+<p>-Resisitance Curve</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.not_initialized">
+<code class="descclassname">Visa_Functions.</code><code class="descname">not_initialized</code><span class="sig-paren">(</span><em>Switch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#not_initialized"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.not_initialized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if Switch is initialized</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Switch</strong> – Switch Address</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+<blockquote>
+<div><p>-True if not Initialized</p>
+<p>-False if Initialized</p>
+</div></blockquote>
+<p>Called by:</p>
+<blockquote>
+<div>-Visa Functions</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.open_channel">
+<code class="descclassname">Visa_Functions.</code><code class="descname">open_channel</code><span class="sig-paren">(</span><em>Switch</em>, <em>card</em>, <em>channel</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#open_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.open_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open switch channel</p>
+<p>The procedure for changing channels is:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>set output current to zero</li>
+<li>close the shorted line</li>
+<li>open any lines besides the shorted line</li>
+</ol>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Switch</strong> – Switch Address</li>
+<li><strong>Card</strong> – Targeted Card Address</li>
+<li><strong>channel</strong> – Current Targeted Channel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Iv_Curve_V2</p>
+<p>-Visa Functions</p>
+<p>-Resisitance Curve</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.open_instrument">
+<code class="descclassname">Visa_Functions.</code><code class="descname">open_instrument</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#open_instrument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.open_instrument" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Address</strong> – Opens the connection to the instrument at the particular address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Instrument</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.open_short">
+<code class="descclassname">Visa_Functions.</code><code class="descname">open_short</code><span class="sig-paren">(</span><em>Switch</em>, <em>card</em>, <em>shorts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#open_short"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.open_short" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens shorts</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Switch</strong> – Switch Address</li>
+<li><strong>Card</strong> – Targeted Card Address</li>
+<li><strong>shorts</strong> – Array of Shorts</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Resistance Curve</p>
+<p>-Iv_Curve_v2</p>
+</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div>-open_channel()</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.read_voltage_fast">
+<code class="descclassname">Visa_Functions.</code><code class="descname">read_voltage_fast</code><span class="sig-paren">(</span><em>Voltmeter</em>, <em>dwell_time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#read_voltage_fast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.read_voltage_fast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes in the voltmeter address instead of doing it in the function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Voltmeter</strong> – The Voltmeter machine address</li>
+<li><strong>Dwell_time</strong> – Time to sleep</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Measured_V-Measure Voltage</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Iv_Curve_V2</p>
+<p>-Resisitance Curve</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.set_current_fast_yoko">
+<code class="descclassname">Visa_Functions.</code><code class="descname">set_current_fast_yoko</code><span class="sig-paren">(</span><em>CurrentSource</em>, <em>I</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#set_current_fast_yoko"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.set_current_fast_yoko" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets Current</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>CurrentSource</strong> – Address of current source</li>
+<li><strong>I</strong> – Target Current</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Current Source Address</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Resistance Curve</p>
+<p>-Visa Functions</p>
+<p>-Iv_Curve_v2</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Visa_Functions.turnon_current_yoko">
+<code class="descclassname">Visa_Functions.</code><code class="descname">turnon_current_yoko</code><span class="sig-paren">(</span><em>CurrentSource</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Visa_Functions.html#turnon_current_yoko"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Visa_Functions.turnon_current_yoko" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns on current from CurrentSource input address</p>
+</dd></dl>
+
+</div>
+<div class="section" id="formatting-input-from-database">
+<h1>Formatting Input from database<a class="headerlink" href="#formatting-input-from-database" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Input_Functions"></span><p>Created on Mon Jul 10 13:59:00 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="Input_Functions.create_steps">
+<code class="descclassname">Input_Functions.</code><code class="descname">create_steps</code><span class="sig-paren">(</span><em>device</em>, <em>Jc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#create_steps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.create_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>400 steps for SQUIDs, 200 for Single/ Array JJs
+Was 100, updated to 200 for higher accuracy 10/24/17</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.create_steps_VPhi">
+<code class="descclassname">Input_Functions.</code><code class="descname">create_steps_VPhi</code><span class="sig-paren">(</span><em>sweep</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#create_steps_VPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.create_steps_VPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create 100 steps based on sweep range</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.format_input_Ic_Ir_devices">
+<code class="descclassname">Input_Functions.</code><code class="descname">format_input_Ic_Ir_devices</code><span class="sig-paren">(</span><em>devices</em>, <em>Jc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#format_input_Ic_Ir_devices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.format_input_Ic_Ir_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the input for taking the IV sweep to find Ic and Iret</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Array of [[cards], [chan1, chan2,..], [Imin, Imax..], [steps], [num_sweeps]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.format_input_Rn_Imax_devices">
+<code class="descclassname">Input_Functions.</code><code class="descname">format_input_Rn_Imax_devices</code><span class="sig-paren">(</span><em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#format_input_Rn_Imax_devices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.format_input_Rn_Imax_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the input for taking the sweep to find normal resistance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Array of [[chan1, chan2,..], [num_JJs], [cards]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.format_input_V_Phi_device">
+<code class="descclassname">Input_Functions.</code><code class="descname">format_input_V_Phi_device</code><span class="sig-paren">(</span><em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#format_input_V_Phi_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.format_input_V_Phi_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the input for taking the V Phi curve for SQUIDs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Array of [[cards],[chan1, chan2,.], [Imin, Imax.], [Ibias],[steps], [num_sweeps]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.format_input_resistance">
+<code class="descclassname">Input_Functions.</code><code class="descname">format_input_resistance</code><span class="sig-paren">(</span><em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#format_input_resistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.format_input_resistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the input for the resistance curve</p>
+<p>(Device continuity, Vias, Resistor Arrays)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">array of [[cards], [chan1, chan2,…]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.get_cards">
+<code class="descclassname">Input_Functions.</code><code class="descname">get_cards</code><span class="sig-paren">(</span><em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#get_cards"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.get_cards" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Card that the device is using</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.get_channels">
+<code class="descclassname">Input_Functions.</code><code class="descname">get_channels</code><span class="sig-paren">(</span><em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#get_channels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.get_channels" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">[chan1, chan2] array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.get_sweep">
+<code class="descclassname">Input_Functions.</code><code class="descname">get_sweep</code><span class="sig-paren">(</span><em>device</em>, <em>Jc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#get_sweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.get_sweep" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>device</strong> – target Device</li>
+<li><strong>Jc</strong> – Critical Current</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Sweep- Array of Imin and Imax</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Input_Functions.get_sweep_Vphi">
+<code class="descclassname">Input_Functions.</code><code class="descname">get_sweep_Vphi</code><span class="sig-paren">(</span><em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Input_Functions.html#get_sweep_Vphi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Input_Functions.get_sweep_Vphi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create sweep for taking VPhi curves, different ranges based on sizes, which
+come from the name of device</p>
+</dd></dl>
+
+</div>
+<div class="section" id="initializing-live-plot-elements">
+<h1>Initializing Live Plot Elements<a class="headerlink" href="#initializing-live-plot-elements" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Live_Plot_Functions"></span><p>Created at some point in the past</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="Live_Plot_Functions.create_current_point">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_current_point</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_current_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_current_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates another set of curves, in order to store the current point that is 
+a different color</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_curves">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_curves</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_curves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_curves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates pyqtgraph ‘curves’ or the plotting scene,this is what updates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_data">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_data</code><span class="sig-paren">(</span><em>curves</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create empty set of data, used to store the full arrays of data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>curves</strong> – array of pyqtgraph curves</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_lines">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_lines</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the infinite, yellow horizontal and vertical lines which constitute
+the crosshair in Overwrite_Rn</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_plots">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_plots</code><span class="sig-paren">(</span><em>windows</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates pyqtgraph plots, which are stord in the windows</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>windows</strong> – array of pyqtgraph windows</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_slope_plots">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_slope_plots</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_slope_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_slope_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a separate line that data can be set to visualize the slope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_slope_plots_resistor_arrays">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_slope_plots_resistor_arrays</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_slope_plots_resistor_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_slope_plots_resistor_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates three separate lines that data can be set to visualize the slope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_vb">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_vb</code><span class="sig-paren">(</span><em>plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_vb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_vb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the Viewbox for a plot, maps the scene being viewed to the plot</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plots</strong> – array of pyqtgraph plots</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Live_Plot_Functions.create_windows">
+<code class="descclassname">Live_Plot_Functions.</code><code class="descname">create_windows</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Live_Plot_Functions.html#create_windows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Live_Plot_Functions.create_windows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates pyqtgraph windows, top level of graphics</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num</strong> – number of window to create</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="sweeping-for-iv">
+<h1>Sweeping for IV<a class="headerlink" href="#sweeping-for-iv" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-IV_curve_v3"></span><p>Created on Fri May 26 14:26:21 2017
+Purpose of this code is to sweep the current and plot an IV curve
+&#64;author: JPulecio</p>
+<dl class="function">
+<dt id="IV_curve_v3.automate_channel_IV_live">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">automate_channel_IV_live</code><span class="sig-paren">(</span><em>app</em>, <em>curve</em>, <em>current_point</em>, <em>cards</em>, <em>channels</em>, <em>currents</em>, <em>step</em>, <em>number_of_sweeps</em>, <em>optionalic=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#automate_channel_IV_live"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.automate_channel_IV_live" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automates the sweep_current_live function for multiple channels</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>curve</strong> (<em>app</em><em>,</em>) – (both pyqtgraph constructs)</li>
+<li><strong>current_point</strong> – pyqtgraph contruct used to plot current point</li>
+<li><strong>card</strong> – Target Card</li>
+<li><strong>channels</strong> – Array of Target Channels</li>
+<li><strong>currents</strong> – Array of currents, 0=I_min,1=Imax</li>
+<li><strong>step</strong> – increment</li>
+<li><strong>number_of_sweeps</strong> – number of sweeps to complete</li>
+<li><strong>optionalic</strong> – Optional Ic for sweep_current_live_variable_points</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Updates a live plot with current on x axis, voltage on y axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Get Rn Imax</p>
+<p>-Get Rn Imax and save</p>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-sweep_current_live_variable_points</p>
+<p>-sweep_current_live</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.exitfunc">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">exitfunc</code><span class="sig-paren">(</span><em>Switch</em>, <em>CurrentSource</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#exitfunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.exitfunc" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Switch</strong> – GPIB switch matrix object</li>
+<li><strong>CurrentSource</strong> – GPIB current source object</li>
+<li><strong>card2</strong> (<em>card1</em><em>,</em>) – Target Cards 1 and 2</li>
+<li><strong>channel2</strong> (<em>channel1</em><em>,</em>) – Target Channels 1 and 2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">exits sweep cleanly</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div>-Virtually all functions in IV_curve_v2</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.find_max_y_change">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">find_max_y_change</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>num_JJ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#find_max_y_change"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.find_max_y_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses an envelope around zero based on num_JJ</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong><strong>,</strong><strong>y</strong> – I,V arrays</li>
+<li><strong>num_JJ</strong> – number of JJs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Critical Currents-First point to enter bounds and last point to exit</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.find_max_y_change_half_sweep">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">find_max_y_change_half_sweep</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>num_JJ</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#find_max_y_change_half_sweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.find_max_y_change_half_sweep" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Uses an envelope around zero based on num_JJ</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong><strong>,</strong><strong>y</strong> – I,V arrays</li>
+<li><strong>num_JJ</strong> – number of JJs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Critical Currents-First point to enter bounds and last point to exit</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.open_data">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">open_data</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#open_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.open_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the values of I, V, R and plots data</p>
+<p>if newplot == 1 it will plot the file in new plot window otherwise it will plot it on same window</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.save_data_live">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">save_data_live</code><span class="sig-paren">(</span><em>I_values</em>, <em>V_values</em>, <em>R_values</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#save_data_live"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.save_data_live" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the raw data as ASCII seperated by tab</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.sweep_current_live">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">sweep_current_live</code><span class="sig-paren">(</span><em>app</em>, <em>curve</em>, <em>current_point</em>, <em>number_of_sweeps</em>, <em>I_min</em>, <em>I_max</em>, <em>step</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#sweep_current_live"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.sweep_current_live" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs:
+:param app, curve: (both pyqtgraph constructs)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_point</strong> – pyqtgraph contruct used to plot current point</li>
+<li><strong>number_of_sweeps</strong> – number of sweeps to complete</li>
+<li><strong>I_min</strong> – current sweep start</li>
+<li><strong>I_maxcurrent</strong> – sweep stop</li>
+<li><strong>step</strong> – increment</li>
+<li><strong>card2</strong> (<em>card1</em><em>,</em>) – Target Cards 1 and 2</li>
+<li><strong>2</strong> (<em>channel1</em><em>,</em><em>channel</em>) – Target Channels</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Updates a live plot with current on x axis, voltage on y axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Measure_Resistance</p>
+<p>-Automate_channel_IV_live</p>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div>All Visa Functions</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.sweep_current_live_GUI">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">sweep_current_live_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>curves</em>, <em>number_of_sweeps</em>, <em>I_min</em>, <em>I_max</em>, <em>step</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#sweep_current_live_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.sweep_current_live_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Automates the sweep_current_live function for the older GUI</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>curve</strong> (<em>app</em><em>,</em>) – (both pyqtgraph constructs)</li>
+<li><strong>number_of_sweeps</strong> – number of sweeps to complete</li>
+<li><strong>I_max</strong> (<em>I_min</em><em>,</em>) – Respective max and min current values</li>
+<li><strong>step</strong> – step size</li>
+<li><strong>card2</strong> (<em>card1</em><em>,</em>) – Target Cards 1 and 2</li>
+<li><strong>channel2</strong> (<em>channel1</em><em>,</em>) – Target Channels 1 and 2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Updates a live plot with current on x axis, voltage on y axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Get Rn Imax</p>
+<p>-Get Rn Imax and save</p>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-sweep_current_live_variable_points</p>
+<p>-sweep_current_live</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.sweep_current_live_Rn">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">sweep_current_live_Rn</code><span class="sig-paren">(</span><em>app</em>, <em>curve</em>, <em>number_of_sweeps</em>, <em>I_min</em>, <em>V_max</em>, <em>step</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em>, <em>dev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#sweep_current_live_Rn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.sweep_current_live_Rn" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>curve</strong> (<em>app</em><em>,</em>) – (both pyqtgraph constructs)</li>
+<li><strong>number_of_sweeps</strong> – number of sweeps to complete</li>
+<li><strong>I_min</strong> – current sweep start</li>
+<li><strong>I_maxcurrent</strong> – sweep stop</li>
+<li><strong>step</strong> – increment</li>
+<li><strong>card 2</strong> (<em>card1</em><em>,</em>) – Target Cards</li>
+<li><strong>2</strong> (<em>channel1</em><em>,</em><em>channel</em>) – Target Channels</li>
+<li><strong>dev</strong> – Target device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Updates a live plot with current on x axis, voltage on y axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Called By:</dt>
+<dd><p class="first">-Get Rn Imax</p>
+<p class="last">-Get Rn Imax and save</p>
+</dd>
+</dl>
+<p>Calls On:</p>
+<blockquote>
+<div>All Visa Functions</div></blockquote>
+<p>FINDS LINEAR SLOPE:
+First checks for hitting Vmax
+Next checks for expected length based on size of JJ
+then looks for 4 collinear point (using stats.linregress) 
+then looks at most recent sets of points
+if all still linear will exit</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="IV_curve_v3.sweep_current_live_variable_points">
+<code class="descclassname">IV_curve_v3.</code><code class="descname">sweep_current_live_variable_points</code><span class="sig-paren">(</span><em>app</em>, <em>curve</em>, <em>current_point</em>, <em>number_of_sweeps</em>, <em>I_min</em>, <em>I_max</em>, <em>step</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em>, <em>optionalic=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IV_curve_v3.html#sweep_current_live_variable_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IV_curve_v3.sweep_current_live_variable_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>This plot will be very dense in points around the estimated ic</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>curve</strong> (<em>app</em><em>,</em>) – (both pyqtgraph constructs)</li>
+<li><strong>number_of_sweeps</strong> – number of sweeps to complete</li>
+<li><strong>current_point</strong> – pyqtgraph contruct used to plot current point</li>
+<li><strong>I_min</strong> – current sweep start</li>
+<li><strong>I_maxcurrent</strong> – sweep stop</li>
+<li><strong>step</strong> – increment</li>
+<li><strong>card2</strong> (<em>card1</em><em>,</em>) – Target Cards</li>
+<li><strong>channel2</strong> (<em>channel1</em><em>,</em>) – Target Channels</li>
+<li><strong>dev</strong> – Target device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Updates a live plot with current on x axis, voltage on y axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Called By:</dt>
+<dd><p class="first">-Get Rn Imax</p>
+<p class="last">-Get Rn Imax and save</p>
+</dd>
+</dl>
+<p>Calls On:</p>
+<blockquote>
+<div>All Visa Functions</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="sweeping-for-resistance">
+<h1>Sweeping for Resistance<a class="headerlink" href="#sweeping-for-resistance" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Resistance_curve"></span><p>Created on Mon Jul 31 13:42:57 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="Resistance_curve.plot_Resistance_Array_live">
+<code class="descclassname">Resistance_curve.</code><code class="descname">plot_Resistance_Array_live</code><span class="sig-paren">(</span><em>app</em>, <em>curve</em>, <em>card1</em>, <em>card2</em>, <em>channel1</em>, <em>channel2</em>, <em>max_current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Resistance_curve.html#plot_Resistance_Array_live"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Resistance_curve.plot_Resistance_Array_live" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a sweep from 0 to 3mA and returns the values plotted
+Updates a live plot with current on x axis, voltage on y axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>curve</strong> – pyqtgraph constuct</li>
+<li><strong>card 2</strong> (<em>card1</em><em>,</em>) – Target card2</li>
+<li><strong>channel2</strong> (<em>channel1</em><em>,</em>) – Target Channels</li>
+<li><strong>max_Current</strong> – max_current before function breaks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I-Values: Arrays of Current Values</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">V-Values: Array of Voltage Values</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">R-Values: Array of Resistance Values</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Funykgraphs Any Sweeps that had non-linear slopes (Determined by Lin-regress)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Measure_Via_Resistance</p>
+<p>-Measure_Device_Resistance</p>
+<p>-Resistance Curve</p>
+<p>-Measure_Resistor_Arrays</p>
+</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div>-All Visa Functions</div></blockquote>
+<p>Uses:</p>
+<blockquote>
+<div><p>-Linregress to determine whether a graph is linear or not</p>
+<p>-Looks for a negative slope or an r^2 value below .9</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="finding-ic-values">
+<h1>Finding Ic Values<a class="headerlink" href="#finding-ic-values" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-measure_Ic"></span><dl class="function">
+<dt id="measure_Ic.create_dir">
+<code class="descclassname">measure_Ic.</code><code class="descname">create_dir</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Ic.html#create_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Ic.create_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the directory of the path given. If it already exists,
+it does nothing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Ic.create_name">
+<code class="descclassname">measure_Ic.</code><code class="descname">create_name</code><span class="sig-paren">(</span><em>chip</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Ic.html#create_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Ic.create_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a chip and a device and creates the name with format: 
+chip_device_size</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Ic.get_Ic_Iret_and_save">
+<code class="descclassname">measure_Ic.</code><code class="descname">get_Ic_Iret_and_save</code><span class="sig-paren">(</span><em>folder</em>, <em>folder_link</em>, <em>chip</em>, <em>devices</em>, <em>Jc</em>, <em>optionalic=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Ic.html#get_Ic_Iret_and_save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Ic.get_Ic_Iret_and_save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inputs is in format: [[cards], [channel1,channel2], [Imin,Imax], [steps], 
+[num_sweeps]]</p>
+<p>Chip must be the name of the chip. Devices should be in an array
+Folder_link is the web link to the folder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Folder</strong> – Target folder for data to be saved</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Devices</strong> – Devices on Target Chip</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array of Ic(pos/neg) and Iret(pos/neg)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array of measurement ids (to pass to measure_Rn)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graph:</th><td class="field-body"><p class="first last">Overlays critical points in cyan on top of raw IV curve</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Measurement Functions</p>
+<blockquote>
+<div><p>-Measure_PCM_Chip_Cold</p>
+<p>-Measure_JJs_Ic</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>Calls On:</dt>
+<dd><p class="first">-automate_channel_IV_live</p>
+<p>-find_max_y_change_half_sweep</p>
+<p>-find_max_y_change</p>
+<p>-save_data_live</p>
+<p>-save_ic_data</p>
+<p class="last">-save_JJ_Measurements_Ic</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Ic.initialization">
+<code class="descclassname">measure_Ic.</code><code class="descname">initialization</code><span class="sig-paren">(</span><em>num_plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Ic.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Ic.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates all the live plot elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Ic.save_ic_data">
+<code class="descclassname">measure_Ic.</code><code class="descname">save_ic_data</code><span class="sig-paren">(</span><em>crit_I</em>, <em>crit_V</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Ic.html#save_ic_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Ic.save_ic_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the critical values in a text file</p>
+</dd></dl>
+
+</div>
+<div class="section" id="finding-rn">
+<h1>Finding Rn<a class="headerlink" href="#finding-rn" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-measure_Rn"></span><p>Created sometime in the past</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="measure_Rn.plot_slope">
+<code class="descclassname">measure_Rn.</code><code class="descname">plot_slope</code><span class="sig-paren">(</span><em>I</em>, <em>V</em>, <em>counter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Rn.html#plot_slope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Rn.plot_slope" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>I</strong> – Current array</li>
+<li><strong>V</strong> – Voltage array</li>
+<li><strong>Counter</strong> – Counter for which graph this data pertains to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">final index-6: slope index</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">slope-measured slope</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graph:</th><td class="field-body"><p class="first last">plots 2 points in red and a trendline based on them over the raw data</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>MeasureRn</p>
+<blockquote>
+<div><p>-get_rn_imax</p>
+<p>-get_rn_imax_and_save</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Rn.save_Rn_data">
+<code class="descclassname">measure_Rn.</code><code class="descname">save_Rn_data</code><span class="sig-paren">(</span><em>Rn</em>, <em>Imax</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Rn.html#save_Rn_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Rn.save_Rn_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the Rn and Imax data</p>
+</dd></dl>
+
+</div>
+<div class="section" id="finding-resistance-of-devices">
+<h1>Finding Resistance of Devices<a class="headerlink" href="#finding-resistance-of-devices" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-measure_Device_Resistance"></span><p>Created on Thu Aug  3 13:52:59 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="measure_Device_Resistance.get_Resistance">
+<code class="descclassname">measure_Device_Resistance.</code><code class="descname">get_Resistance</code><span class="sig-paren">(</span><em>folder</em>, <em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Device_Resistance.html#get_Resistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Device_Resistance.get_Resistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sweep the current from 0 to 3mA and return the resistance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Folder</strong> – Target folder for data to be saved</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Devices</strong> – Devices on Target Chip</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">return_measurements_Resistance-I,V,R arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">funkygraphlist-List of abnormal graphs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Measurement Functions</p>
+<blockquote>
+<div><p>-check_connections</p>
+<p>-Measure_PCM_Chip_Warm</p>
+</div></blockquote>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-plot_Resistance_Array_live</p>
+<p>-save_Resistance_data_device</p>
+<p>-save_data_live</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Device_Resistance.initialization">
+<code class="descclassname">measure_Device_Resistance.</code><code class="descname">initialization</code><span class="sig-paren">(</span><em>num_plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Device_Resistance.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Device_Resistance.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates live plot elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Device_Resistance.save_Resistance_data_device">
+<code class="descclassname">measure_Device_Resistance.</code><code class="descname">save_Resistance_data_device</code><span class="sig-paren">(</span><em>R</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Device_Resistance.html#save_Resistance_data_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Device_Resistance.save_Resistance_data_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the resistance in a text file</p>
+</dd></dl>
+
+</div>
+<div class="section" id="finding-resistance-of-vias">
+<h1>Finding Resistance of Vias<a class="headerlink" href="#finding-resistance-of-vias" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-measure_Via_Resistance"></span><p>Created on Thu Aug  3 13:52:59 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="measure_Via_Resistance.get_Resistance_Via">
+<code class="descclassname">measure_Via_Resistance.</code><code class="descname">get_Resistance_Via</code><span class="sig-paren">(</span><em>folder</em>, <em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Via_Resistance.html#get_Resistance_Via"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Via_Resistance.get_Resistance_Via" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sweeps from 0 to 3mA and returns the slope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> – folder name of where data will be saved</li>
+<li><strong>chip</strong> – Target chip</li>
+<li><strong>devices</strong> – Array of target devices</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">return_measurements: I,V,R arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>Measurement_Functions</p>
+<blockquote>
+<div>-measure pcm cold and warm</div></blockquote>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-plot_Resistance_Array_live</p>
+<p>-save_data_live</p>
+<p>-save_Resistance_data_Via</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Via_Resistance.initialization">
+<code class="descclassname">measure_Via_Resistance.</code><code class="descname">initialization</code><span class="sig-paren">(</span><em>num_plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Via_Resistance.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Via_Resistance.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create live plotting elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Via_Resistance.save_Resistance_data_Via">
+<code class="descclassname">measure_Via_Resistance.</code><code class="descname">save_Resistance_data_Via</code><span class="sig-paren">(</span><em>R</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Via_Resistance.html#save_Resistance_data_Via"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Via_Resistance.save_Resistance_data_Via" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the resistance in a text file to the name passed in</p>
+</dd></dl>
+
+</div>
+<div class="section" id="finding-resistance-of-resistor-arrays">
+<h1>Finding Resistance of Resistor Arrays<a class="headerlink" href="#finding-resistance-of-resistor-arrays" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-measure_Resistor_Arrays_v2"></span><p>Created on Mon Jul 31 11:50:50 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="measure_Resistor_Arrays_v2.get_resistance_arrays">
+<code class="descclassname">measure_Resistor_Arrays_v2.</code><code class="descname">get_resistance_arrays</code><span class="sig-paren">(</span><em>folder</em>, <em>chip</em>, <em>devices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Resistor_Arrays_v2.html#get_resistance_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Resistor_Arrays_v2.get_resistance_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a sweep from 0 to 3mA and returns the slope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Folder</strong> – Target folder for data to be saved</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Devices</strong> – Devices on Target Chip</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">return_measurements_Resistance-I,V,R arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>-Measurement Functions</p>
+<blockquote>
+<div><p>-Measure_PCM_Chip_Cold</p>
+<p>-Measure_PCM_Chip_Warm</p>
+</div></blockquote>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-plot_Resistance_Array_live</p>
+<p>-plot_slope_Resistance_arrays</p>
+<p>-save_data_live</p>
+<p>-save_resistance_data</p>
+<p>-save_JJ_Measurements_Ic</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Resistor_Arrays_v2.initialization">
+<code class="descclassname">measure_Resistor_Arrays_v2.</code><code class="descname">initialization</code><span class="sig-paren">(</span><em>num_plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Resistor_Arrays_v2.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Resistor_Arrays_v2.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates all the live plot elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Resistor_Arrays_v2.plot_slope_Resistor_Arrays">
+<code class="descclassname">measure_Resistor_Arrays_v2.</code><code class="descname">plot_slope_Resistor_Arrays</code><span class="sig-paren">(</span><em>I</em>, <em>V</em>, <em>counter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Resistor_Arrays_v2.html#plot_slope_Resistor_Arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Resistor_Arrays_v2.plot_slope_Resistor_Arrays" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>I</strong> – Current array</li>
+<li><strong>V</strong> – Voltage array</li>
+<li><strong>Counter</strong> – Counter for which graph this data pertains to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">final index-6: slope index</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">slope-measured slope</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graph:</th><td class="field-body"><p class="first last">plots 2 points in red and a trendline based on them over the raw data</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>MeasureRn</p>
+<blockquote>
+<div>-get_resistance_arrays</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_Resistor_Arrays_v2.save_resistance_data">
+<code class="descclassname">measure_Resistor_Arrays_v2.</code><code class="descname">save_resistance_data</code><span class="sig-paren">(</span><em>resistances</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_Resistor_Arrays_v2.html#save_resistance_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_Resistor_Arrays_v2.save_resistance_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the values found for the resistances in a .dat file</p>
+</dd></dl>
+
+</div>
+<div class="section" id="overwriting-rn">
+<h1>Overwriting Rn<a class="headerlink" href="#overwriting-rn" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Overwrite_Rn"></span><p>Created on Mon Jul 17 14:23:53 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="Overwrite_Rn.MouseMoved">
+<code class="descclassname">Overwrite_Rn.</code><code class="descname">MouseMoved</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Overwrite_Rn.html#MouseMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Overwrite_Rn.MouseMoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to track the mouse movement, redraws crosshairs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Overwrite_Rn.initialization">
+<code class="descclassname">Overwrite_Rn.</code><code class="descname">initialization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Overwrite_Rn.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Overwrite_Rn.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize plotting elements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Overwrite_Rn.onClick">
+<code class="descclassname">Overwrite_Rn.</code><code class="descname">onClick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Overwrite_Rn.html#onClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Overwrite_Rn.onClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Response to a mouse click.</p>
+<p>Draws red point on first and second click and slope between them for RN</p>
+<p>Third click is a green point for the Imax</p>
+<p>After the third click, the new data is written into the database if the measurement is unique.</p>
+<p>Otherwise, a function to manually select the measurement is printed</p>
+<p>Fourth Click clears and resets</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Overwrite_Rn.open_data">
+<code class="descclassname">Overwrite_Rn.</code><code class="descname">open_data</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Overwrite_Rn.html#open_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Overwrite_Rn.open_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>User selects values for rn and I max using the mouse and the database is 
+updated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – full filename of _Rn_raw data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Overwrite_Rn.overwrite_Rn_Imax">
+<code class="descclassname">Overwrite_Rn.</code><code class="descname">overwrite_Rn_Imax</code><span class="sig-paren">(</span><em>chipname</em>, <em>devicename</em>, <em>new_Rn</em>, <em>new_Imax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Overwrite_Rn.html#overwrite_Rn_Imax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Overwrite_Rn.overwrite_Rn_Imax" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Sets the Rn and Imax in the database to the new values passed</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chipname</strong> – Target Chip</li>
+<li><strong>devicename</strong> – Target Device</li>
+<li><strong>new_Rn</strong> – New Rn to be Saved</li>
+<li><strong>new_Imax</strong> – New Imax to be Saved</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="plot-generation">
+<h1>Plot Generation<a class="headerlink" href="#plot-generation" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Plot_Generation_v2"></span><p>Have functions to generate plots showing data
+Created on Tue Sep  5 17:29:30 2017</p>
+<p>&#64;author: Soroush</p>
+<dl class="function">
+<dt id="Plot_Generation_v2.heat_map">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">heat_map</code><span class="sig-paren">(</span><em>Wafer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#heat_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.heat_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can only run on Soroush’s computer, need Plotly. Generates an HTML heat map 
+of a wafer’s Jc. Check Plot_Generation folder in volt for HTML files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.initialization">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">initialization</code><span class="sig-paren">(</span><em>num_plots</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#initialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.initialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates all the live plot elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Num_plots</strong> – Number of Plots to Initialize</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Curves</td>
+</tr>
+</tbody>
+</table>
+<p>Called by:</p>
+<blockquote>
+<div><p>-Plot Generation</p>
+<blockquote>
+<div>-Plot_Ic_RN</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_IV_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_IV_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Chip</em>, <em>Device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_IV_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_IV_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots an Raw IV curve for a single device</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Device</strong> – Target Device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Voltage on y axis and Current on x axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_V3-Plot</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-Show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+<p>-Scipy-stats.linregress</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_Ic_Rn_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_Ic_Rn_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Wafer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_Ic_Rn_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_Ic_Rn_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass in wafer and design name, will generate plot for Ic of all devices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Wafer</strong> – Target Wafer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">IC vs Device for each chip overlayed</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_v3 plot()</div></blockquote>
+<p>Calls on:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+<p>-show_chips_from_wafer</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_Ic_Rn_from_type">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_Ic_Rn_from_type</code><span class="sig-paren">(</span><em>Wafers</em>, <em>Designs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_Ic_Rn_from_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_Ic_Rn_from_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Ic and RN of a certain design type in popup individual windows</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Wafers</strong> – Target Wafers</li>
+<li><strong>Designs</strong> – Target Designs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Ic for Devices and Rn for Devices</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Measurement_GUI_V3</p>
+<blockquote>
+<div><p>-showData</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Database V4</p>
+<blockquote>
+<div><p>-Show_chips_from_wafer</p>
+<p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+</li>
+</ul>
+<p>-Plot Generation</p>
+<blockquote>
+<div>-Initialization</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_Ic_radius_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_Ic_radius_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Chip</em>, <em>dev_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_Ic_radius_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_Ic_radius_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Square Root of IC vs Device Radius</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Device</strong> – Target Device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">m- slope of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">b- intercept of trendline</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">r2- R^2 fit (number between 0 and 1), gives linearity of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">sqrt(IC) on y axis and Device Radius on x axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_V3- icReport</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_Rn_radius_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_Rn_radius_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Chip</em>, <em>dev_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_Rn_radius_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_Rn_radius_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots 1/RN vs Device Radius</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>dev_type</strong> – Device Type</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">m- slope of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">b- intercept of trendline</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">r2- R^2 fit (number between 0 and 1), gives linearity of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">1/RN on y axis and Device Radius on x axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_V3-rnReport</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_product_device_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_product_device_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Chip</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_product_device_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_product_device_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Ic*RN for each Device on a Chip</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>dev_type</strong> – Device Type</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">m- slope of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">b- intercept of trendline</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">r2- R^2 fit (number between 0 and 1), gives linearity of trendline</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Ic*RN product on y axis and device on x axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_V3-productReport</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Plot_Generation_v2.plot_rn_from_GUI">
+<code class="descclassname">Plot_Generation_v2.</code><code class="descname">plot_rn_from_GUI</code><span class="sig-paren">(</span><em>app</em>, <em>plot</em>, <em>Chip</em>, <em>Device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Plot_Generation_v2.html#plot_rn_from_GUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Plot_Generation_v2.plot_rn_from_GUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Ic*RN for each Device on a Chip</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>app</strong> – pyqtgraph construct</li>
+<li><strong>plot</strong> – pyqtgraph constuct</li>
+<li><strong>Chip</strong> – Target Chip</li>
+<li><strong>Device</strong> – Target Device</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">I- Array of Current Data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">V- Array of Voltage Data</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">worked_raw- Number of raw_location files??</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body"><p class="first last">Voltage on y axis and Current on x axis</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-Measurement_GUI_V3-plotRN</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Database V4</p>
+<blockquote>
+<div><p>-show_devices_from_chip</p>
+<p>-show_measurements_from_device</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="running-the-gui">
+<h1>Running The GUI<a class="headerlink" href="#running-the-gui" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-Measurement_GUI_v3"></span><p>Created &#64;some point in past</p>
+<p>&#64;author: sdk</p>
+<p>MAIN GUI</p>
+<dl class="class">
+<dt id="Measurement_GUI_v3.MyApp">
+<em class="property">class </em><code class="descclassname">Measurement_GUI_v3.</code><code class="descname">MyApp</code><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.MouseMoved">
+<code class="descname">MouseMoved</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.MouseMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.MouseMoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reacts to mouse movement</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Measurement_GUI_v3.MyApp.app">
+<code class="descname">app</code><em class="property"> = None</em><a class="headerlink" href="#Measurement_GUI_v3.MyApp.app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilaizes and runs the GUI for the whole program</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.chipselectionchange">
+<code class="descname">chipselectionchange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.chipselectionchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.chipselectionchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows user to select or change chip</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.clearRn">
+<code class="descname">clearRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.clearRn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.clearRn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets class variables to zero, empty string or empty array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.closegraphs">
+<code class="descname">closegraphs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.closegraphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.closegraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes all graphs currently open</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.coldmeasure">
+<code class="descname">coldmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.coldmeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.coldmeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the chip cold, first with an Iv curve and next with a Rn test</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">IV and Rn</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>fullTest</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Measurement_GUI_v3</p>
+<blockquote>
+<div><p>-Get_enabled_devices</p>
+<p>-message_Box</p>
+</div></blockquote>
+<p>Measurement_Functions</p>
+<blockquote>
+<div>-Measure_PCM_chip_warm</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.contmeasure">
+<code class="descname">contmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.contmeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.contmeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures Continuity to check for shorts</p>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-Get_enabled_devices,</p>
+<p>-Measurement_Functions-check_connections</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.dialog_box">
+<code class="descname">dialog_box</code><span class="sig-paren">(</span><em>window_title</em>, <em>message</em>, <em>default_text=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.dialog_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.dialog_box" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Title</strong> (<em>Window</em>) – Title of pop-up window</li>
+<li><strong>Message</strong> – Prompt for user imput</li>
+<li><strong>Default_text</strong> – text to be changed to response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response-User Inputed text</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Ok-boolean on validity of input text</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.findDateInfo">
+<code class="descname">findDateInfo</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.findDateInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.findDateInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets date information based on directory string parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.fullTest">
+<code class="descname">fullTest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.fullTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.fullTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measurement flow:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Plug in probe while it is not dunked</li>
+</ol>
+<p>2. Run measure_PCM_chip_warm before dunking. Will plot simple I-V line to make
+sure there are no open connections, and measure RT values</p>
+<ol class="arabic simple" start="3">
+<li>Slowly dunk probe</li>
+</ol>
+<p>4. Call measure_PCM_chip_cold. This will take IV’s of all the devices on the PCM
+i.e. SJs and arrays. Then it will find resistance of Resistor Arrays and Vias
+then it find normal resistance for devices.</p>
+</div></blockquote>
+<p>Performs Warm and Cold tests in order</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">Continuity, followed by Iv and Rn graphs</td>
+</tr>
+</tbody>
+</table>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-warmmeasure,coldmeasure,closegraphs,message_box</p>
+<p>-Database_v4-Predict_IC</p>
+<p>-Measurement_Functions-Measure_JJs_IC</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.get_enabled_devices">
+<code class="descname">get_enabled_devices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.get_enabled_devices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.get_enabled_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets Devices that need to be measured</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Devices to be Measured</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>Measurement_GUI_V3-</p>
+<blockquote>
+<div>-All measurement functions</div></blockquote>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Database V4</p>
+<blockquote>
+<div>-show_devices_from_chip</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.icReport">
+<code class="descname">icReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.icReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.icReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the Ic graph of sqrt(Ic) vs Radius
+Calls the plot_Ic_radius_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.ivmeasure">
+<code class="descname">ivmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.ivmeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.ivmeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures IV withouts saving to database</p>
+<p>Calls On:</p>
+<blockquote>
+<div><table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-M<var>easurement_GUI_v3-</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td><p class="first">-Get_enabled_devices</p>
+<p class="last">-dialog_Box</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-D<var>atabase_v4</var></span></kbd></td>
+<td>-Predict_IC</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-M<var>easurement_Functions</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>-Measure_JJs_IC</td></tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.message_box">
+<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.message_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.message_box" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Message</strong> – the message to display on the pop-up</li>
+<li><strong>Type</strong> – <p>the icon that will be displayed:</p>
+<p>-0 for info</p>
+<p>-1 for warning</p>
+<p>-2 for critcal</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Pop-up:</th><td class="field-body"><p class="first last">Message with Importance of Type</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.onClick">
+<code class="descname">onClick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.onClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.onClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reacts to mouse click</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the Graphs Tab of the GUI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Device</strong> (<em>Single</em>) – Radio Button on GUI</li>
+<li><strong>Device</strong> – Radio Button on GUI</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Iv Curve of Single Device or Ic Overlay of All Chips</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Measurement_GUI_v3</p>
+<blockquote>
+<div>-message_Box</div></blockquote>
+<p>Plot_Generation_v2</p>
+<blockquote>
+<div><p>-plot Ic_Rn_from_GUI</p>
+<p>-plot_IV_from_GUI</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.plotPoints">
+<code class="descname">plotPoints</code><span class="sig-paren">(</span><em>type='rn'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plotPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.plotPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots points with color based on what type of graph it is</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.plotRn">
+<code class="descname">plotRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plotRn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.plotRn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots RN for a selected chip</p>
+<p>Calls the plot_rn_from_GUI function from Plot Generation v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.productReport">
+<code class="descname">productReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.productReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.productReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the graph of Ic*Rn for each Device
+Calls the plot_product_device_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh the database to get new chips entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.reportGraphInfo">
+<code class="descname">reportGraphInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.reportGraphInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.reportGraphInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a array of graph info including current plot,current chip and current type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.rnReport">
+<code class="descname">rnReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.rnReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.rnReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the Rn graph of sqrt(rn) vs Radius
+Calls the plot_Rn_radius_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.rnmeasure">
+<code class="descname">rnmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.rnmeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.rnmeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures RN withouts saving to database</p>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Get_enabled_devices</p>
+<p>-Measure_JJs_Rn</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.saveRn">
+<code class="descname">saveRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.saveRn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.saveRn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves RN measurement</p>
+<p>Calls:</p>
+<blockquote>
+<div><p>Database v4</p>
+<blockquote>
+<div><p>-get_measurement_from_device</p>
+<p>-save_JJ_measurements_Rn</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.selectall">
+<code class="descname">selectall</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.selectall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.selectall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Radio Button on Measurement page below ‘View Wafer Data’</p>
+<p>Lets you toggle which devices are selected for measurement</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.setstatus">
+<code class="descname">setstatus</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.setstatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.setstatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows status of program in bottom right corner</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.showData">
+<code class="descname">showData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.showData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.showData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pops-up numerous graphs of Ic and Rn</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.stopfunc">
+<code class="descname">stopfunc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.stopfunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.stopfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops any functions currently running</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.tabIndexChanged">
+<code class="descname">tabIndexChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.tabIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.tabIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes between tabs on the GUI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.waferselectionchange">
+<code class="descname">waferselectionchange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.waferselectionchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.waferselectionchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows user to select or change wafer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Measurement_GUI_v3.MyApp.warmmeasure">
+<code class="descname">warmmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.warmmeasure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Measurement_GUI_v3.MyApp.warmmeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the chip warm and checks for shorts and other graphical oddities</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">Continuity</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Pop-up:</th><td class="field-body">Abnormal Graphs-If a graph is nonlinear or has negative slope
+this function will return which device to look at for the issue</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-fullTest</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-Get_enabled_devices,message_Box</p>
+<p>-Measurement_Functions-Measure_PCM_chip_warm</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">Measurement_GUI_v3.</code><code class="descname">MyApp</code><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="method">
+<dt>
+<code class="descname">MouseMoved</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.MouseMoved"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reacts to mouse movement</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">app</code><em class="property"> = None</em></dt>
+<dd><p>Initilaizes and runs the GUI for the whole program</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">chipselectionchange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.chipselectionchange"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Allows user to select or change chip</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">clearRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.clearRn"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Resets class variables to zero, empty string or empty array</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">closegraphs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.closegraphs"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Closes all graphs currently open</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">coldmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.coldmeasure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measures the chip cold, first with an Iv curve and next with a Rn test</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">IV and Rn</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>fullTest</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Measurement_GUI_v3</p>
+<blockquote>
+<div><p>-Get_enabled_devices</p>
+<p>-message_Box</p>
+</div></blockquote>
+<p>Measurement_Functions</p>
+<blockquote>
+<div>-Measure_PCM_chip_warm</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">contmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.contmeasure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measures Continuity to check for shorts</p>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-Get_enabled_devices,</p>
+<p>-Measurement_Functions-check_connections</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">dialog_box</code><span class="sig-paren">(</span><em>window_title</em>, <em>message</em>, <em>default_text=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.dialog_box"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Title</strong> (<em>Window</em>) – Title of pop-up window</li>
+<li><strong>Message</strong> – Prompt for user imput</li>
+<li><strong>Default_text</strong> – text to be changed to response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response-User Inputed text</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Ok-boolean on validity of input text</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">findDateInfo</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.findDateInfo"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Gets date information based on directory string parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">fullTest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.fullTest"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measurement flow:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Plug in probe while it is not dunked</li>
+</ol>
+<p>2. Run measure_PCM_chip_warm before dunking. Will plot simple I-V line to make
+sure there are no open connections, and measure RT values</p>
+<ol class="arabic simple" start="3">
+<li>Slowly dunk probe</li>
+</ol>
+<p>4. Call measure_PCM_chip_cold. This will take IV’s of all the devices on the PCM
+i.e. SJs and arrays. Then it will find resistance of Resistor Arrays and Vias
+then it find normal resistance for devices.</p>
+</div></blockquote>
+<p>Performs Warm and Cold tests in order</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">Continuity, followed by Iv and Rn graphs</td>
+</tr>
+</tbody>
+</table>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-warmmeasure,coldmeasure,closegraphs,message_box</p>
+<p>-Database_v4-Predict_IC</p>
+<p>-Measurement_Functions-Measure_JJs_IC</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">get_enabled_devices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.get_enabled_devices"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Gets Devices that need to be measured</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Devices to be Measured</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div><p>Measurement_GUI_V3-</p>
+<blockquote>
+<div>-All measurement functions</div></blockquote>
+</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Database V4</p>
+<blockquote>
+<div>-show_devices_from_chip</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">icReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.icReport"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shows the Ic graph of sqrt(Ic) vs Radius
+Calls the plot_Ic_radius_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">ivmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.ivmeasure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measures IV withouts saving to database</p>
+<p>Calls On:</p>
+<blockquote>
+<div><table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-M<var>easurement_GUI_v3-</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td><p class="first">-Get_enabled_devices</p>
+<p class="last">-dialog_Box</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-D<var>atabase_v4</var></span></kbd></td>
+<td>-Predict_IC</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-M<var>easurement_Functions</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>-Measure_JJs_IC</td></tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">message_box</code><span class="sig-paren">(</span><em>message</em>, <em>type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.message_box"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Message</strong> – the message to display on the pop-up</li>
+<li><strong>Type</strong> – <p>the icon that will be displayed:</p>
+<p>-0 for info</p>
+<p>-1 for warning</p>
+<p>-2 for critcal</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Pop-up:</th><td class="field-body"><p class="first last">Message with Importance of Type</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">onClick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.onClick"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reacts to mouse click</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plot"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Runs the Graphs Tab of the GUI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Device</strong> (<em>Single</em>) – Radio Button on GUI</li>
+<li><strong>Device</strong> – Radio Button on GUI</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Iv Curve of Single Device or Ic Overlay of All Chips</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Calls On:</p>
+<blockquote>
+<div><p>Measurement_GUI_v3</p>
+<blockquote>
+<div>-message_Box</div></blockquote>
+<p>Plot_Generation_v2</p>
+<blockquote>
+<div><p>-plot Ic_Rn_from_GUI</p>
+<p>-plot_IV_from_GUI</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">plotPoints</code><span class="sig-paren">(</span><em>type='rn'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plotPoints"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Plots points with color based on what type of graph it is</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">plotRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.plotRn"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Plots RN for a selected chip</p>
+<p>Calls the plot_rn_from_GUI function from Plot Generation v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">productReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.productReport"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shows the graph of Ic*Rn for each Device
+Calls the plot_product_device_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.refresh"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Refresh the database to get new chips entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">reportGraphInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.reportGraphInfo"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a array of graph info including current plot,current chip and current type</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">rnReport</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.rnReport"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shows the Rn graph of sqrt(rn) vs Radius
+Calls the plot_Rn_radius_from_GUI function from plot_generation_v2</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">rnmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.rnmeasure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measures RN withouts saving to database</p>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Get_enabled_devices</p>
+<p>-Measure_JJs_Rn</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">saveRn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.saveRn"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Saves RN measurement</p>
+<p>Calls:</p>
+<blockquote>
+<div><p>Database v4</p>
+<blockquote>
+<div><p>-get_measurement_from_device</p>
+<p>-save_JJ_measurements_Rn</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">selectall</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.selectall"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Radio Button on Measurement page below ‘View Wafer Data’</p>
+<p>Lets you toggle which devices are selected for measurement</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">setstatus</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.setstatus"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shows status of program in bottom right corner</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">showData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.showData"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Pops-up numerous graphs of Ic and Rn</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">stopfunc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.stopfunc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Stops any functions currently running</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">tabIndexChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.tabIndexChanged"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Changes between tabs on the GUI</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">waferselectionchange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.waferselectionchange"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Allows user to select or change wafer</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">warmmeasure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Measurement_GUI_v3.html#MyApp.warmmeasure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Measures the chip warm and checks for shorts and other graphical oddities</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Graphs:</th><td class="field-body">Continuity</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Pop-up:</th><td class="field-body">Abnormal Graphs-If a graph is nonlinear or has negative slope
+this function will return which device to look at for the issue</td>
+</tr>
+</tbody>
+</table>
+<p>Called By:</p>
+<blockquote>
+<div>-fullTest</div></blockquote>
+<p>Calls On:</p>
+<blockquote>
+<div><p>-Measurement_GUI_v3-Get_enabled_devices,message_Box</p>
+<p>-Measurement_Functions-Measure_PCM_chip_warm</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="running-the-database">
+<h1>Running The DataBase<a class="headerlink" href="#running-the-database" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="index.html">Home</a></p>
+<span class="target" id="module-database_v4"></span><p>Created on Fri Jun 30 16:52:50 2017</p>
+<p>&#64;author: javier pulecio</p>
+<dl class="class">
+<dt id="database_v4.Chip">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Chip</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Chip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Chip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Design">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Design" title="Permalink to this definition">¶</a></dt>
+<dd><p>This takes in name of the device and string of tuples (device type, number of devices, junction radius in um, pads, channels)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Device">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Device</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="database_v4.JJ_Measurement">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">JJ_Measurement</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#JJ_Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.JJ_Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>This takes in name of the device and string of tuples (device type, number of devices, junction radius in um, pads, channels)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Resistor_Measurement">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Resistor_Measurement</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Resistor_Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Resistor_Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resistor Measurement</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Squid_Measurement">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Squid_Measurement</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Squid_Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Squid_Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squid Measurement</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Via_Measurement">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Via_Measurement</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Via_Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Via_Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Via Measurement</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="database_v4.Wafer">
+<em class="property">class </em><code class="descclassname">database_v4.</code><code class="descname">Wafer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#Wafer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.Wafer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database_v4.calc_JJ_measurements">
+<code class="descclassname">database_v4.</code><code class="descname">calc_JJ_measurements</code><span class="sig-paren">(</span><em>Ic_list</em>, <em>Rn</em>, <em>Imax</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#calc_JJ_measurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.calc_JJ_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will calculate the JJ measurements based on the values of Ic, Iret, Rn, and Imax
+Returns a list with all the values Ic_pos, Ic_neg, Iret_pos, Iret_neg, Imax, Rn, Iret_Ic_ratio, Ic_Rn_product, Rn_Area_product, Inverse_sqrtRn, sqrtIc, Jc_nom</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.calc_JJ_measurements_after">
+<code class="descclassname">database_v4.</code><code class="descname">calc_JJ_measurements_after</code><span class="sig-paren">(</span><em>Ic_list</em>, <em>Rn</em>, <em>Imax</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#calc_JJ_measurements_after"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.calc_JJ_measurements_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will calculate the JJ measurements based Ics, Rn, Imax, and Radius
+Returns a list with all the values Ic_pos, Ic_neg, Iret_pos, Iret_neg, Imax, Rn, Iret_Ic_ratio, Ic_Rn_product, Rn_Area_product, Inverse_sqrtRn, sqrtIc, Jc_nom</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.calc_Jc">
+<code class="descclassname">database_v4.</code><code class="descname">calc_Jc</code><span class="sig-paren">(</span><em>Ic</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#calc_Jc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.calc_Jc" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns value of critical current density Jc based on Ic and JJ radius</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.chip_Jc">
+<code class="descclassname">database_v4.</code><code class="descname">chip_Jc</code><span class="sig-paren">(</span><em>chip</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#chip_Jc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.chip_Jc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries the database for wafer.Jc_approx</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.device_def">
+<code class="descclassname">database_v4.</code><code class="descname">device_def</code><span class="sig-paren">(</span><em>chip_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#device_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.device_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass in chip name returns the device definition as list of tuples</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.predict_Ic">
+<code class="descclassname">database_v4.</code><code class="descname">predict_Ic</code><span class="sig-paren">(</span><em>Jc</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#predict_Ic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.predict_Ic" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns value of predicted Ic</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_JJ_Measurements">
+<code class="descclassname">database_v4.</code><code class="descname">save_JJ_Measurements</code><span class="sig-paren">(</span><em>chip</em>, <em>Ic_list</em>, <em>Rn</em>, <em>Imax</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_JJ_Measurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_JJ_Measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_JJ_Measurements_Ic">
+<code class="descclassname">database_v4.</code><code class="descname">save_JJ_Measurements_Ic</code><span class="sig-paren">(</span><em>chip</em>, <em>Ic_list</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_JJ_Measurements_Ic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_JJ_Measurements_Ic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+<p>returns measurment id, for measure Rn to use and pass into the calc_JJ_measuremnts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_JJ_Measurements_Rn">
+<code class="descclassname">database_v4.</code><code class="descname">save_JJ_Measurements_Rn</code><span class="sig-paren">(</span><em>chip</em>, <em>Rn</em>, <em>Imax</em>, <em>measurement_id</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_JJ_Measurements_Rn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_JJ_Measurements_Rn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_Resistance_Measurements_cold">
+<code class="descclassname">database_v4.</code><code class="descname">save_Resistance_Measurements_cold</code><span class="sig-paren">(</span><em>chip</em>, <em>Resistance_list</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_Resistance_Measurements_cold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_Resistance_Measurements_cold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_Resistance_Measurements_warm">
+<code class="descclassname">database_v4.</code><code class="descname">save_Resistance_Measurements_warm</code><span class="sig-paren">(</span><em>chip</em>, <em>Resistance_list</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_Resistance_Measurements_warm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_Resistance_Measurements_warm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_Squid_Measurements">
+<code class="descclassname">database_v4.</code><code class="descname">save_Squid_Measurements</code><span class="sig-paren">(</span><em>chip</em>, <em>Ic_list</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_Squid_Measurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_Squid_Measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_Via_Measurements_cold">
+<code class="descclassname">database_v4.</code><code class="descname">save_Via_Measurements_cold</code><span class="sig-paren">(</span><em>chip</em>, <em>resistance</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_Via_Measurements_cold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_Via_Measurements_cold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.save_Via_Measurements_warm">
+<code class="descclassname">database_v4.</code><code class="descname">save_Via_Measurements_warm</code><span class="sig-paren">(</span><em>chip</em>, <em>resistance</em>, <em>data_directory</em>, <em>device</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#save_Via_Measurements_warm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.save_Via_Measurements_warm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves 4 Ic values from Ic_list to the measurements of the particular chip
+Extracts the device details from the passed in device object and assigns
+the measurement to the chip from the passed in chip id or name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.sweep_def">
+<code class="descclassname">database_v4.</code><code class="descname">sweep_def</code><span class="sig-paren">(</span><em>Jc</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#sweep_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.sweep_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates sweep range for one device</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.sweep_def_SQUID_bigger_range">
+<code class="descclassname">database_v4.</code><code class="descname">sweep_def_SQUID_bigger_range</code><span class="sig-paren">(</span><em>Jc</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#sweep_def_SQUID_bigger_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.sweep_def_SQUID_bigger_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates sweep range for one device</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database_v4.sweep_def_SQUID_smaller_range">
+<code class="descclassname">database_v4.</code><code class="descname">sweep_def_SQUID_smaller_range</code><span class="sig-paren">(</span><em>Jc</em>, <em>JJ_radius</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database_v4.html#sweep_def_SQUID_smaller_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database_v4.sweep_def_SQUID_smaller_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates sweep range for one device</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Main Functions</a></li>
+<li><a class="reference internal" href="#communicating-with-instruments">Communicating With Instruments</a></li>
+<li><a class="reference internal" href="#formatting-input-from-database">Formatting Input from database</a></li>
+<li><a class="reference internal" href="#initializing-live-plot-elements">Initializing Live Plot Elements</a></li>
+<li><a class="reference internal" href="#sweeping-for-iv">Sweeping for IV</a></li>
+<li><a class="reference internal" href="#sweeping-for-resistance">Sweeping for Resistance</a></li>
+<li><a class="reference internal" href="#finding-ic-values">Finding Ic Values</a></li>
+<li><a class="reference internal" href="#finding-rn">Finding Rn</a></li>
+<li><a class="reference internal" href="#finding-resistance-of-devices">Finding Resistance of Devices</a></li>
+<li><a class="reference internal" href="#finding-resistance-of-vias">Finding Resistance of Vias</a></li>
+<li><a class="reference internal" href="#finding-resistance-of-resistor-arrays">Finding Resistance of Resistor Arrays</a></li>
+<li><a class="reference internal" href="#overwriting-rn">Overwriting Rn</a></li>
+<li><a class="reference internal" href="#plot-generation">Plot Generation</a></li>
+<li><a class="reference internal" href="#running-the-gui">Running The GUI</a></li>
+<li><a class="reference internal" href="#running-the-database">Running The DataBase</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sop.html"
+                        title="previous chapter">SOP</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sop.html" title="SOP"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

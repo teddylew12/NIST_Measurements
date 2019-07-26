@@ -1,0 +1,935 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Plot_Generation_v2 &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Plot_Generation_v2</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Have functions to generate plots showing data</span>
+<span class="sd">Created on Tue Sep  5 17:29:30 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">Live_Plot_Functions</span> <span class="k">as</span> <span class="nn">lpf</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+
+
+<div class="viewcode-block" id="initialization"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.initialization">[docs]</a><span class="k">def</span> <span class="nf">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates all the live plot elements</span>
+<span class="sd">    </span>
+<span class="sd">    :param Num_plots: Number of Plots to Initialize</span>
+<span class="sd">    </span>
+<span class="sd">    :return: Curves</span>
+<span class="sd">        </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Plot Generation</span>
+<span class="sd">        </span>
+<span class="sd">            -Plot_Ic_RN</span>
+<span class="sd">        </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_windows</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+    <span class="n">plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_plots</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_curves</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">curves</span></div>
+
+
+
+<div class="viewcode-block" id="plot_Ic_Rn_from_type"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_Ic_Rn_from_type">[docs]</a><span class="k">def</span> <span class="nf">plot_Ic_Rn_from_type</span><span class="p">(</span><span class="n">Wafers</span><span class="p">,</span> <span class="n">Designs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Plots Ic and RN of a certain design type in popup individual windows</span>
+<span class="sd">    </span>
+<span class="sd">    :param Wafers: Target Wafers</span>
+<span class="sd">    </span>
+<span class="sd">    :param Designs: Target Designs</span>
+<span class="sd">   </span>
+<span class="sd">    :Graphs: Ic for Devices and Rn for Devices</span>
+<span class="sd">        </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        - Measurement_GUI_V3</span>
+<span class="sd">            </span>
+<span class="sd">            -showData</span>
+<span class="sd">        </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        - Database V4</span>
+<span class="sd">        </span>
+<span class="sd">            -Show_chips_from_wafer</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">        </span>
+<span class="sd">        -Plot Generation</span>
+<span class="sd">        </span>
+<span class="sd">            -Initialization</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># function to plot all Ic&#39;s on same window</span>
+
+    <span class="kn">import</span> <span class="nn">Live_Plot_Functions</span> <span class="k">as</span> <span class="nn">lpf</span>
+    <span class="k">global</span> <span class="n">app</span><span class="p">,</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+ 
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">import</span> <span class="nn">imp</span>
+
+    
+    <span class="c1"># create app instance</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+   
+    <span class="c1"># create plotting elements</span>
+    <span class="n">initialization</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Wafers</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Wafers</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+
+        <span class="n">all_chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">Wafers</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_chips</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No chips found, did you enter design name right?&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">windows</span><span class="p">:</span>
+                <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        
+        <span class="n">chips</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_chips</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">all_chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">Designs</span><span class="p">[</span><span class="n">n</span><span class="p">]:</span>
+                <span class="n">chips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_chips</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">chips</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No chips found, did you enter design name right?&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">windows</span><span class="p">:</span>
+                <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Ic plot</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;Ic&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">)</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Rn Plot</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;Rn&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">)</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">win32api</span> <span class="k">import</span> <span class="n">GetSystemMetrics</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">GetSystemMetrics</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">GetSystemMetrics</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">Ic_curves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Rn_curves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chips</span><span class="p">)):</span>
+            <span class="n">Ic_curve</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">Ic_curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ic_curve</span><span class="p">)</span>
+            
+            <span class="n">Rn_curve</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">Rn_curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rn_curve</span><span class="p">)</span>
+
+        <span class="c1"># plot</span>
+        
+        <span class="n">Ic_legend</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">addLegend</span><span class="p">()</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+
+        <span class="n">Rn_legend</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">addLegend</span><span class="p">()</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="n">num_devices</span> <span class="o">=</span> <span class="mi">20</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chips</span><span class="p">)):</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[:</span><span class="n">num_devices</span><span class="p">]</span>
+            <span class="n">Ics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">Rns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">x_axis</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">x_label</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+                <span class="c1"># Query database, returns [Ic, Rn]</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">Ics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">Rns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">x_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">x_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">Ic_curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">Ics</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">Rn_curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">Rns</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">Ic_legend</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">Ic_curves</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">Rn_legend</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">Rn_curves</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            <span class="n">x_label</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">x_label</span><span class="p">))</span>
+
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">x_label</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Ic&quot;</span><span class="o">%</span><span class="n">Wafers</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+        
+        
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">x_label</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Rn&quot;</span><span class="o">%</span><span class="n">Wafers</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+        
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<span class="k">def</span> <span class="nf">find_D</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Chip</span><span class="p">):</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">Chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;1&quot;</span><span class="p">):</span>
+                <span class="k">break</span>
+        
+        <span class="n">i</span> <span class="o">-=</span><span class="mi">1</span>
+        
+    <span class="k">return</span> <span class="n">i</span>
+            
+<div class="viewcode-block" id="plot_rn_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_rn_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_rn_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Chip</span><span class="p">,</span> <span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Plots Ic*RN for each Device on a Chip</span>
+<span class="sd">   </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Chip: Target Chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param Device: Target Device</span>
+<span class="sd">    </span>
+<span class="sd">    :return: I- Array of Current Data</span>
+<span class="sd">   </span>
+<span class="sd">    :return: V- Array of Voltage Data</span>
+<span class="sd">    </span>
+<span class="sd">    :return: worked_raw- Number of raw_location files??</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Voltage on y axis and Current on x axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">    </span>
+<span class="sd">        -Measurement_GUI_V3-plotRN</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;C:/Users/sdk/Downloads/&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;E:/Users/volt.686QVACTEST/National Institute of Standards and Technology (NIST)/SEG - SFQ_Circuits/&quot;</span>
+   
+    
+    <span class="n">directories</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_data_directory</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+    <span class="n">rn_locatoins</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">raw_locations</span> <span class="o">=</span><span class="p">[]</span>
+    
+    <span class="k">if</span> <span class="n">directories</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">directories</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span>
+        <span class="n">d_location</span> <span class="o">=</span> <span class="n">find_D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">Chip</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="p">(</span><span class="n">d_location</span><span class="o">==-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">directory</span><span class="p">[</span><span class="n">d_location</span><span class="p">:]</span>
+    
+        <span class="n">device</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_device</span><span class="p">(</span><span class="n">Device</span><span class="p">,</span><span class="n">output</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="p">(</span><span class="n">device</span><span class="o">==-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span>
+    
+        <span class="n">chip_info_name</span> <span class="o">=</span> <span class="n">Chip</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">Device</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">)(</span><span class="n">size</span><span class="p">)</span>
+    
+        <span class="n">raw_data_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData_Rn/&quot;</span> <span class="o">+</span> <span class="n">chip_info_name</span> <span class="o">+</span> <span class="s2">&quot;_Rn_raw.dat&quot;</span>
+    
+        <span class="n">rn_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Rn_values/&quot;</span> <span class="o">+</span> <span class="n">chip_info_name</span> <span class="o">+</span> <span class="s2">&quot;_Rn.dat&quot;</span>
+        
+        <span class="n">rn_locatoins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rn_filename</span><span class="p">)</span>
+        <span class="n">raw_locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_data_filename</span><span class="p">)</span>
+        
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">raw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_locations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>   
+
+            <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">Rn_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">rn_locatoins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">worked_raw</span> <span class="o">=</span> <span class="n">raw</span>
+            
+        <span class="k">except</span><span class="p">:</span>        
+            <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+        <span class="n">Ic</span><span class="p">,</span><span class="n">Vc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">Rn_file</span><span class="p">)</span>
+        
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem reading file!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+    
+    <span class="n">curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">worked_raw</span></div>
+
+    
+<div class="viewcode-block" id="plot_IV_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_IV_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_IV_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Chip</span><span class="p">,</span> <span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots an Raw IV curve for a single device</span>
+<span class="sd">    </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Chip: Target Chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param Device: Target Device </span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Voltage on y axis and Current on x axis</span>
+<span class="sd">   </span>
+<span class="sd">    Called By:</span>
+<span class="sd">    </span>
+<span class="sd">        -Measurement_GUI_V3-Plot</span>
+<span class="sd">    </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">    </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">        </span>
+<span class="sd">            -Show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">    </span>
+<span class="sd">        -Scipy-stats.linregress</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlopen</span>
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;C:/Users/sdk/Downloads/&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;E:/Users/volt.686QVACTEST/National Institute of Standards and Technology (NIST)/SEG - SFQ_Circuits/&quot;</span>
+   
+    
+    <span class="n">directories</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_data_directory</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+    <span class="n">ic_locatoins</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">raw_locations</span> <span class="o">=</span><span class="p">[]</span>
+    
+    <span class="k">if</span> <span class="n">directories</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;http://132.163.82.9:3000/&quot;</span>
+        <span class="n">d_location</span> <span class="o">=</span> <span class="n">find_D</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">Chip</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="p">(</span><span class="n">d_location</span><span class="o">==-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">directory</span><span class="p">[</span><span class="n">d_location</span><span class="p">:]</span>
+        
+        
+        <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_device</span><span class="p">(</span><span class="n">Device</span><span class="p">,</span><span class="n">output</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">optional_designid</span><span class="o">=</span><span class="n">chip</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span>    
+        <span class="k">if</span> <span class="p">(</span><span class="n">device</span><span class="o">==-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span>
+    
+        <span class="n">chip_info_name</span> <span class="o">=</span> <span class="n">Chip</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">Device</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">)(</span><span class="n">size</span><span class="p">)</span>
+    
+        <span class="n">raw_data_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/RawData/&quot;</span> <span class="o">+</span> <span class="n">chip_info_name</span> <span class="o">+</span> <span class="s2">&quot;_Ic_raw.dat&quot;</span>
+    
+        <span class="n">ic_filename</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/Ic_values/&quot;</span> <span class="o">+</span> <span class="n">chip_info_name</span> <span class="o">+</span> <span class="s2">&quot;_Ic.dat&quot;</span>
+        
+        <span class="n">ic_locatoins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ic_filename</span><span class="p">)</span>
+        <span class="n">raw_locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_data_filename</span><span class="p">)</span>
+        
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">raw</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_locations</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>   
+    
+            <span class="n">raw_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">Ic_file</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">ic_locatoins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>            
+            
+        <span class="k">except</span><span class="p">:</span>   
+            <span class="k">pass</span>
+      
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">raw_file</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+        <span class="n">Ic</span><span class="p">,</span><span class="n">Vc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">Ic_file</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem reading file&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    
+    <span class="n">curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    
+    
+    <span class="k">for</span> <span class="n">n1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Ic</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">n1</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">type_of_current</span> <span class="o">=</span> <span class="s2">&quot;I&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">type_of_current</span> <span class="o">=</span> <span class="s2">&quot;I&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="n">I_c</span> <span class="o">=</span> <span class="n">type_of_current</span><span class="o">+</span><span class="s1">&#39;:(&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{:.2E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ic</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span><span class="o">+</span> <span class="s1">&#39;</span><span class="si">{:.2E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Vc</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">I_c</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">Ic</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> <span class="n">Vc</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">new_curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">new_curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">Ic</span><span class="p">[</span><span class="n">n1</span><span class="p">:</span><span class="n">n1</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Vc</span><span class="p">[</span><span class="n">n1</span><span class="p">:</span><span class="n">n1</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span></div>
+      
+
+<div class="viewcode-block" id="plot_product_device_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_product_device_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_product_device_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Chip</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots Ic*RN for each Device on a Chip</span>
+<span class="sd">   </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Chip: Target Chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param dev_type: Device Type</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    :return: m- slope of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: b- intercept of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: r2- R^2 fit (number between 0 and 1), gives linearity of trendline</span>
+<span class="sd">   </span>
+<span class="sd">    :Graphs: Ic*RN product on y axis and device on x axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">   </span>
+<span class="sd">        -Measurement_GUI_V3-productReport</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">   </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    
+    <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chip</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>    
+        
+    <span class="n">curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    
+
+    <span class="n">ic_rn_product</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">x_axis</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x_label</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+        <span class="c1"># Query database, returns [Ic, Rn]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="n">ic_rn_product</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            
+        <span class="n">x_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+        <span class="n">x_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ic_rn_product</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+   
+    <span class="n">x_label</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">x_label</span><span class="p">))</span>
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">x_label</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;Ic*Rn&#39;</span><span class="p">,</span><span class="s1">&#39;A*Ohms&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">)</span>    </div>
+
+<div class="viewcode-block" id="plot_Ic_radius_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_Ic_radius_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_Ic_radius_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Chip</span><span class="p">,</span> <span class="n">dev_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots Square Root of IC vs Device Radius</span>
+<span class="sd">    </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Chip: Target Chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param Device: Target Device</span>
+<span class="sd">    </span>
+<span class="sd">    :return: m- slope of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: b- intercept of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: r2- R^2 fit (number between 0 and 1), gives linearity of trendline</span>
+<span class="sd">   </span>
+<span class="sd">    :Graphs: sqrt(IC) on y axis and Device Radius on x axis</span>
+<span class="sd">    </span>
+
+<span class="sd">    Called By:</span>
+<span class="sd">   </span>
+<span class="sd">        -Measurement_GUI_V3- icReport</span>
+
+<span class="sd">    Calls On:</span>
+<span class="sd">   </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
+    
+    <span class="n">plot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    
+    
+    <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chip</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">unfiltered_devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">unfiltered_devices</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="n">dev_type</span><span class="p">:</span>
+            <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">curve2</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="c1">#curve.showButtons()</span>
+    
+    <span class="n">radii</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">root_ic</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">zero_radii</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">zero_ic</span><span class="o">=</span><span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">radii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="o">*</span><span class="mf">1e-06</span><span class="p">)</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span><span class="n">dev</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">root_ic</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ic</span><span class="p">))</span>
+    <span class="c1"># linear fit, remove zero&#39;s</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span><span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">root_ic</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">zero_radii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">radii</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">zero_ic</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root_ic</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">root_ic</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">radii</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>        
+        
+        
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;Ic&#39;</span><span class="p">,</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device Radius&#39;</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    
+    <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">root_ic</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">curve2</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">zero_radii</span><span class="p">,</span><span class="n">zero_ic</span><span class="p">,</span><span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+         
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">root_ic</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">std_err</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span><span class="n">root_ic</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">=</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">lin_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lin_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lin_curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,(</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">lin_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">lin_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">lin_curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">lin_x</span><span class="p">,</span><span class="n">lin_y</span><span class="p">)</span>
+        
+    <span class="n">plot</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r2</span></div>
+
+<div class="viewcode-block" id="plot_Rn_radius_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_Rn_radius_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_Rn_radius_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Chip</span><span class="p">,</span> <span class="n">dev_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots 1/RN vs Device Radius</span>
+<span class="sd">    </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Chip: Target Chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param dev_type: Device Type</span>
+<span class="sd">    </span>
+<span class="sd">    :return: m- slope of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: b- intercept of trendline</span>
+<span class="sd">    </span>
+<span class="sd">    :return: r2- R^2 fit (number between 0 and 1), gives linearity of trendline</span>
+<span class="sd">   </span>
+<span class="sd">    :Graphs:  1/RN on y axis and Device Radius on x axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">   </span>
+<span class="sd">        -Measurement_GUI_V3-rnReport</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">   </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
+    
+    <span class="n">plot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    
+    <span class="n">chip</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">chip</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">unfiltered_devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">unfiltered_devices</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="n">dev_type</span><span class="p">:</span>
+            <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">curve2</span><span class="o">=</span><span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    
+   <span class="c1"># curve.showButtons()</span>
+    
+    <span class="n">radii</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i_root_rn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">zero_radii</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">zero_rn</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">radii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="o">*</span><span class="mf">1e-06</span><span class="p">)</span>
+        <span class="n">rn</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span><span class="n">dev</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">rn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rn</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">i_root_rn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i_root_rn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rn</span><span class="p">))</span>
+     <span class="c1"># linear fit, remove zero&#39;s</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span><span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">i_root_rn</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">zero_radii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">radii</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">zero_rn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_root_rn</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">i_root_rn</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">radii</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    
+        
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;1/Rn&#39;</span><span class="p">,</span><span class="s1">&#39;Ohms&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device Radius&#39;</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">i_root_rn</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">curve2</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">zero_radii</span><span class="p">,</span><span class="n">zero_rn</span><span class="p">,</span><span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="n">m</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">i_root_rn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  
+    <span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">std_err</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span><span class="n">i_root_rn</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">=</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">lin_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lin_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lin_curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,(</span><span class="n">radii</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">lin_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">lin_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">lin_curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">lin_x</span><span class="p">,</span><span class="n">lin_y</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r2</span></div>
+    
+<div class="viewcode-block" id="plot_Ic_Rn_from_GUI"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.plot_Ic_Rn_from_GUI">[docs]</a><span class="k">def</span> <span class="nf">plot_Ic_Rn_from_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">Wafer</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    Pass in wafer and design name, will generate plot for Ic of all devices</span>
+<span class="sd">    </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param plot: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param Wafer: Target Wafer</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: IC vs Device for each chip overlayed</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measurement_GUI_v3 plot()</span>
+<span class="sd">        </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">        </span>
+<span class="sd">        -Database V4</span>
+<span class="sd">            </span>
+<span class="sd">            -show_devices_from_chip</span>
+<span class="sd">            </span>
+<span class="sd">            -show_measurements_from_device</span>
+<span class="sd">            </span>
+<span class="sd">            -show_chips_from_wafer</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    
+    <span class="n">all_chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_chips</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No chips found, did you enter design name right?&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">chips</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_chips</span><span class="p">)):</span>
+        <span class="n">chips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_chips</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">chips</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No chips found, did you enter design name right?&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="c1"># Ic plot</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;Ic&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">Ic_curves</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chips</span><span class="p">)):</span>
+        <span class="n">Ic_curve</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+        <span class="c1">#Ic_curve.showButtons()</span>
+        <span class="n">Ic_curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ic_curve</span><span class="p">)</span>
+        
+    <span class="c1"># plot</span>
+    <span class="n">Ic_legend</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">addLegend</span><span class="p">()</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    
+    <span class="n">num_devices</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chips</span><span class="p">)):</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[:</span><span class="n">num_devices</span><span class="p">]</span>
+        <span class="n">Ics</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="n">x_axis</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">x_label</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+            <span class="c1"># Query database, returns [Ic, Rn]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">Ics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="n">x_axis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">x_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">Ic_curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">Ics</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">Ic_legend</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">Ic_curves</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        
+        <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+        <span class="n">x_label</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">x_label</span><span class="p">))</span>
+        
+    <span class="n">plot</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">x_label</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Ic&quot;</span><span class="o">%</span><span class="n">Wafer</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="mi">0</span></div>
+        
+
+
+<div class="viewcode-block" id="heat_map"><a class="viewcode-back" href="../code.html#Plot_Generation_v2.heat_map">[docs]</a><span class="k">def</span> <span class="nf">heat_map</span><span class="p">(</span><span class="n">Wafer</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Can only run on Soroush&#39;s computer, need Plotly. Generates an HTML heat map </span>
+<span class="sd">    of a wafer&#39;s Jc. Check Plot_Generation folder in volt for HTML files</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">import</span> <span class="nn">plotly</span> <span class="k">as</span> <span class="nn">py</span>
+
+    <span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+    <span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+    <span class="kn">import</span> <span class="nn">imp</span>
+    
+    <span class="n">imp</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+    
+    <span class="n">all_chips</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span>
+    
+    
+    <span class="c1"># create blank matrix of all 0&#39;s</span>
+    <span class="n">Jc_data</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Jc_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+            
+    
+    <span class="n">num_devcices</span> <span class="o">=</span> <span class="mi">20</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_chips</span><span class="p">)):</span>
+        <span class="n">chip</span> <span class="o">=</span> <span class="n">all_chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">chip</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;PCMS2A&#39;</span><span class="p">:</span>
+            <span class="c1"># find the location, in row, col form</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="n">chip</span><span class="o">.</span><span class="n">location</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">65</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">-</span> <span class="mi">1</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+            
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[:</span><span class="n">num_devcices</span><span class="p">]</span>
+            
+            <span class="n">Jc_total</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+                <span class="n">meas</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">Jc</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">calc_Jc</span><span class="p">(</span><span class="n">meas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="o">*</span><span class="mf">1e-06</span><span class="p">)</span><span class="o">/</span><span class="mf">1e07</span>
+                
+                <span class="n">Jc_total</span> <span class="o">=</span> <span class="n">Jc_total</span> <span class="o">+</span> <span class="n">Jc</span>
+                
+            <span class="n">Jc_avg</span> <span class="o">=</span> <span class="n">Jc_total</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
+            
+            <span class="n">Jc_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">Jc_avg</span>
+        
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">Jc_data</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span><span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">]</span>
+    
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">]</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Heatmap</span><span class="p">(</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">Jc_data</span><span class="p">,</span>
+                        <span class="n">xgap</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">ygap</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span><span class="p">]</span>
+    <span class="kn">import</span> <span class="nn">plotly.figure_factory</span> <span class="k">as</span> <span class="nn">ff</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_annotated_heatmap</span><span class="p">(</span><span class="n">Jc_data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">py</span><span class="o">.</span><span class="n">offline</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;Z:/JPulecio/Code/Python/Resistance_Measurements/Plot_Generation/</span><span class="si">%s</span><span class="s1">_HeatMap_final.html&#39;</span><span class="o">%</span><span class="n">Wafer</span><span class="p">,</span> <span class="n">auto_open</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+    
+
+
+
+    
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>measure_V_Phi &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for measure_V_Phi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue Jul 25 17:49:25 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">Input_Functions</span> <span class="k">as</span> <span class="nn">inpfunc</span>
+<span class="kn">import</span> <span class="nn">VPhi_Curve</span> <span class="k">as</span> <span class="nn">vp</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">exporters</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">Live_Plot_Functions</span> <span class="k">as</span> <span class="nn">lpf</span>
+<span class="kn">import</span> <span class="nn">IV_curve</span> <span class="k">as</span> <span class="nn">iv</span>
+
+<div class="viewcode-block" id="measure_V_Phi"><a class="viewcode-back" href="../code.html#measure_V_Phi.measure_V_Phi">[docs]</a><span class="k">def</span> <span class="nf">measure_V_Phi</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Main funciton to call. Will hold a bias current line at 110% of Ic, sweep a </span>
+<span class="sd">    flux line, and live plot the Voltage</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inpfunc</span><span class="o">.</span><span class="n">format_input_V_Phi_device</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
+    <span class="n">VPhi_measurements</span> <span class="o">=</span> <span class="n">get_V_Phi</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VPhi_measurements</span></div>
+
+<div class="viewcode-block" id="initialization"><a class="viewcode-back" href="../code.html#measure_V_Phi.initialization">[docs]</a><span class="k">def</span> <span class="nf">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create live plot elements</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_windows</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+    <span class="n">plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_plots</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_curves</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">curves</span></div>
+
+<div class="viewcode-block" id="get_V_Phi"><a class="viewcode-back" href="../code.html#measure_V_Phi.get_V_Phi">[docs]</a><span class="k">def</span> <span class="nf">get_V_Phi</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    inputs format: [[cards], [channel1,channel2], [Imin,Imax], [Ibias], [steps],</span>
+<span class="sd">    [sweeps]]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># globals- necesarry to avoid automatic deletion of objects</span>
+    <span class="k">global</span> <span class="n">app</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">my_exporters</span>
+    <span class="c1"># get variables</span>
+    <span class="n">cards</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">currents</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">sweeps</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    
+    
+    <span class="c1"># create instance of the app</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    
+    <span class="c1"># detect the number of plots need based on the crads, since there is a 1:1 ratio</span>
+    <span class="c1"># between devices and cards (%use devices?)</span>
+    <span class="n">num_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cards</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;num plots: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">num_plots</span><span class="p">)</span>
+
+    <span class="c1"># initialize by opening correct number of windows</span>
+    <span class="c1"># each window contains a plot, each plot a curve and they are stored in arrays</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+
+    <span class="c1"># we need two indexes, one for pairs, one for normal</span>
+    <span class="n">index_pairs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">return_measurements</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># the array that we will return</span>
+
+    <span class="n">my_exporters</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># array to hold exporters (hopefully solves problem of C object being deleted)</span>
+    <span class="c1"># create exporters</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_plots</span><span class="p">):</span>
+        <span class="n">exporter</span> <span class="o">=</span> <span class="n">exporters</span><span class="o">.</span><span class="n">ImageExporter</span><span class="p">(</span><span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+        <span class="n">my_exporters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exporter</span><span class="p">)</span>
+    
+    <span class="c1"># take all the sweeps</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">num_plots</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Begin Device </span><span class="si">%s</span><span class="s2"> sweep&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="c1"># get two channels and two current limits that are needed</span>
+        <span class="n">my_channels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_currents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">index_pairs</span><span class="p">])</span>
+        <span class="n">my_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">index_pairs</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">my_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currents</span><span class="p">[</span><span class="n">index_pairs</span><span class="p">])</span>
+        <span class="n">my_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currents</span><span class="p">[</span><span class="n">index_pairs</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">create_name</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># create the name</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="c1"># set title to name</span>
+
+        <span class="c1"># bring current window to focus        </span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="o">-</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># move to other desktop, spyder had been blocking before</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setWindowState</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowActive</span><span class="p">)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+        
+        <span class="c1"># this will activate the window (yellow flashing on icon)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+        
+        <span class="c1"># sweep the current device</span>
+        <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span>  <span class="n">vp</span><span class="o">.</span><span class="n">automate_channel_VPhi_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">cards</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">my_channels</span><span class="p">,</span> <span class="n">my_currents</span><span class="p">,</span> <span class="n">bias</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">sweeps</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="c1"># Saving #</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_VPhi.png&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">create_dir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1"># function to create dir if doesn&#39;t exist</span>
+       
+                
+
+        <span class="n">iv</span><span class="o">.</span><span class="n">save_data_live</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span><span class="p">,(</span><span class="n">folder</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_VPhi_raw.dat&quot;</span><span class="p">))</span> <span class="c1"># save the raw data</span>
+    
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_exporters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1"># export the graph</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error occurred&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        
+        <span class="c1"># repeat</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">index_pairs</span> <span class="o">=</span> <span class="n">index_pairs</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End Device </span><span class="si">%s</span><span class="s2"> sweep</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">return_measurements</span></div>
+
+<div class="viewcode-block" id="create_name"><a class="viewcode-back" href="../code.html#measure_V_Phi.create_name">[docs]</a><span class="k">def</span> <span class="nf">create_name</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates the name for the file and graph</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">chip</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+    <span class="n">dev_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">dev_size</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">chip</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">dev_size</span></div>
+
+<div class="viewcode-block" id="create_dir"><a class="viewcode-back" href="../code.html#measure_V_Phi.create_dir">[docs]</a><span class="k">def</span> <span class="nf">create_dir</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates the directory if it doesn&#39;t already exist</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+    </div>
+  </body>
+</html>

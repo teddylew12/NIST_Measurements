@@ -1,0 +1,498 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Visa_Functions &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Visa_Functions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu May 25 10:15:13 2017</span>
+<span class="sd">--This purpose of this file is to have basic function library that all the different scripts can use </span>
+<span class="sd">@author: JPulecio</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#=================================</span>
+<span class="c1">#Import libraries</span>
+<span class="c1">#=================================</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">visa</span> 
+<span class="c1">#=================================</span>
+<span class="c1">#Global variables</span>
+<span class="c1">#=================================</span>
+<span class="n">yoko_GS200</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">yoko_GS610</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">address_I</span> <span class="o">=</span> <span class="n">yoko_GS200</span>
+<span class="n">address_V</span> <span class="o">=</span> <span class="mi">23</span>
+<span class="n">address_keithley_7001</span> <span class="o">=</span> <span class="mi">26</span>
+<span class="n">address_keithley_7002</span> <span class="o">=</span> <span class="mi">27</span>
+<span class="n">address_Switch</span> <span class="o">=</span> <span class="n">address_keithley_7002</span>
+<span class="n">short_channel</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">card</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+<span class="c1">#cards_with_shorts = [1, 1, 3, 3]</span>
+<span class="c1">#short_for_cards = [10, 40, 10, 40] #These are the shorts for the cards above which match via index</span>
+<span class="n">cards_with_shorts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">short_for_cards</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span> <span class="c1">#These are the shorts for the cards above which match via index</span>
+
+<span class="n">total_cards</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="c1">#=================================</span>
+<span class="c1">#Function definitions</span>
+<span class="c1">#=================================</span>
+
+
+<div class="viewcode-block" id="open_instrument"><a class="viewcode-back" href="../code.html#Visa_Functions.open_instrument">[docs]</a><span class="k">def</span> <span class="nf">open_instrument</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param Address: Opens the connection to the instrument at the particular address </span>
+<span class="sd">    </span>
+<span class="sd">    :return: Instrument</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="n">visa</span><span class="o">.</span><span class="n">ResourceManager</span><span class="p">()</span><span class="o">.</span><span class="n">open_resource</span><span class="p">(</span><span class="s1">&#39;GPIB0::</span><span class="si">%d</span><span class="s1">::INSTR&#39;</span> <span class="o">%</span> <span class="n">address</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">instrument</span></div>
+
+
+<span class="c1">#========================</span>
+<span class="c1"># functions for yoko using address I</span>
+<span class="c1">#========================</span>
+<div class="viewcode-block" id="intialize_current_yoko"><a class="viewcode-back" href="../code.html#Visa_Functions.intialize_current_yoko">[docs]</a><span class="k">def</span> <span class="nf">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes current source</span>
+<span class="sd">     </span>
+<span class="sd">    :param CurrentSource: Address of current source</span>
+<span class="sd">    </span>
+<span class="sd">    :param Irange: Current range</span>
+<span class="sd">    </span>
+<span class="sd">    :param compliance_voltage: compliance_voltage</span>
+
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve</span>
+<span class="sd">        </span>
+<span class="sd">        -Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_v2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">address_I</span> <span class="o">==</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:FUNC CURR&#39;</span><span class="p">)</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:CURR:RANG </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Irange</span><span class="p">))</span>  <span class="c1"># sets current range</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:CURR:PROT:VOLT </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">compliance_voltage</span><span class="p">)</span>  <span class="c1"># sets complaince voltage</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:FUNC CURR&#39;</span><span class="p">)</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:RANG </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Irange</span><span class="p">))</span>  <span class="c1"># sets current range</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;:SOUR:PROT:VOLT </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">compliance_voltage</span><span class="p">)</span>  <span class="c1"># sets complaince voltage</span></div>
+
+
+<div class="viewcode-block" id="turnon_current_yoko"><a class="viewcode-back" href="../code.html#Visa_Functions.turnon_current_yoko">[docs]</a><span class="k">def</span> <span class="nf">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Turns on current from CurrentSource input address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;OUTP ON&quot;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="set_current_fast_yoko"><a class="viewcode-back" href="../code.html#Visa_Functions.set_current_fast_yoko">[docs]</a><span class="k">def</span> <span class="nf">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets Current</span>
+<span class="sd">    </span>
+<span class="sd">    :param CurrentSource: Address of current source</span>
+<span class="sd">    </span>
+<span class="sd">    :param I: Target Current </span>
+<span class="sd">    </span>
+<span class="sd">    :return: Current Source Address</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve</span>
+<span class="sd">        </span>
+<span class="sd">        -Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_v2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">address_I</span> <span class="o">==</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;:SOUR:CURR:LEV </span><span class="si">%0.3E</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">I</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">CurrentSource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;:SOUR:LEV:FIX </span><span class="si">%0.3E</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">I</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CurrentSource</span></div>
+        
+
+<span class="c1">#===================</span>
+
+<span class="c1">##The following functions were written to measure resistance</span>
+<div class="viewcode-block" id="get_current"><a class="viewcode-back" href="../code.html#Visa_Functions.get_current">[docs]</a><span class="k">def</span> <span class="nf">get_current</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens current source</span>
+<span class="sd">    </span>
+<span class="sd">   :return: Current Source Address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">open_instrument</span><span class="p">(</span><span class="n">address_I</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CurrentSource</span></div>
+
+<div class="viewcode-block" id="get_switch"><a class="viewcode-back" href="../code.html#Visa_Functions.get_switch">[docs]</a><span class="k">def</span> <span class="nf">get_switch</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens switch</span>
+<span class="sd">    </span>
+<span class="sd">    :return: Switch Address</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">open_instrument</span><span class="p">(</span><span class="n">address_Switch</span><span class="p">)</span>    
+    <span class="k">return</span> <span class="n">Switch</span></div>
+    
+<div class="viewcode-block" id="get_voltage"><a class="viewcode-back" href="../code.html#Visa_Functions.get_voltage">[docs]</a><span class="k">def</span> <span class="nf">get_voltage</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens Voltmeter</span>
+<span class="sd">    </span>
+<span class="sd">    :return: Voltmeter Address</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">open_instrument</span><span class="p">(</span><span class="n">address_V</span><span class="p">)</span>    
+    <span class="k">return</span> <span class="n">Voltmeter</span></div>
+
+
+<div class="viewcode-block" id="open_short"><a class="viewcode-back" href="../code.html#Visa_Functions.open_short">[docs]</a><span class="k">def</span> <span class="nf">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">shorts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens shorts </span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    :param Card: Targeted Card Address</span>
+<span class="sd">   </span>
+<span class="sd">    :param shorts: Array of Shorts</span>
+<span class="sd">    </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_v2</span>
+<span class="sd">        </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">        </span>
+<span class="sd">        -open_channel()</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+<span class="c1">#    if card == 2:</span>
+<span class="c1">#        card = 1</span>
+<span class="c1">#    if card == 4:</span>
+<span class="c1">#        card = 3</span>
+<span class="c1">#    try:</span>
+<span class="c1">#        for i in shorts[card-1]:</span>
+<span class="c1">#            open_channel(Switch, card, i)</span>
+<span class="c1">#    except:</span>
+<span class="c1">#        open_channel(Switch, card, shorts[card-1])</span>
+<span class="c1">#    </span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">cards_with_shorts</span><span class="p">:</span>
+        <span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">short_for_cards</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">e</span> <span class="o">+</span> <span class="mi">1</span></div>
+        
+<div class="viewcode-block" id="close_short"><a class="viewcode-back" href="../code.html#Visa_Functions.close_short">[docs]</a><span class="k">def</span> <span class="nf">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">shorts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Closes short</span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    :param Card: Targeted Card Address</span>
+<span class="sd">   </span>
+<span class="sd">    :param shorts: Array of Shorts</span>
+<span class="sd">    </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_v2</span>
+<span class="sd">    </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">        </span>
+<span class="sd">        -close_channel()</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+<span class="c1">#    if card == 2:</span>
+<span class="c1">#        card = 1</span>
+<span class="c1">#    if card == 4:</span>
+<span class="c1">#        card = 3</span>
+<span class="c1">#    try:</span>
+<span class="c1">#        for i in shorts[card-1]:</span>
+<span class="c1">#            close_channel(Switch, card, i)</span>
+<span class="c1">#    except:</span>
+<span class="c1">#        close_channel(Switch, card, shorts[card-1])</span>
+<span class="c1">#    </span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">cards_with_shorts</span><span class="p">:</span>
+        <span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">short_for_cards</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">e</span> <span class="o">+</span> <span class="mi">1</span></div>
+        
+<div class="viewcode-block" id="intialize_switch_all"><a class="viewcode-back" href="../code.html#Visa_Functions.intialize_switch_all">[docs]</a><span class="k">def</span> <span class="nf">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialized Switch</span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    :return: Switch the Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve </span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_v2</span>
+<span class="sd">        </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">        </span>
+<span class="sd">        -not_initialized(Switch)</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="n">Switch</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*rst&#39;</span><span class="p">)</span>    
+    <span class="c1">#Following opens all the channels except the short</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">not_initialized</span><span class="p">(</span><span class="n">Switch</span><span class="p">)):</span> 
+        <span class="n">Switch</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;:OPEN ALL&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cards_with_shorts</span><span class="p">):</span>
+            <span class="n">short</span> <span class="o">=</span> <span class="s1">&#39;@</span><span class="si">%s</span><span class="s1">!</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">short_for_cards</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="c1">#change short_for_cards array in global variable above</span>
+            <span class="n">Switch</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;close (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">short</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Switch Already Init.&quot;</span><span class="p">)</span>
+        
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">Switch</span></div>
+
+
+
+<div class="viewcode-block" id="not_initialized"><a class="viewcode-back" href="../code.html#Visa_Functions.not_initialized">[docs]</a><span class="k">def</span> <span class="nf">not_initialized</span><span class="p">(</span><span class="n">Switch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if Switch is initialized</span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        </span>
+<span class="sd">        -True if not Initialized</span>
+<span class="sd">        </span>
+<span class="sd">        -False if Initialized</span>
+<span class="sd">        </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Visa Functions </span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Switch</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;:clos:stat?&quot;</span><span class="p">))</span>
+    <span class="n">init_state</span> <span class="o">=</span> <span class="s2">&quot;(@&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">cards_with_shorts</span><span class="p">)):</span>
+        <span class="n">init_state</span> <span class="o">=</span> <span class="n">init_state</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">!</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">cards_with_shorts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">short_for_cards</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">cards_with_shorts</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">init_state</span> <span class="o">=</span> <span class="n">init_state</span> <span class="o">+</span> <span class="s2">&quot;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">init_state</span> <span class="o">=</span> <span class="n">init_state</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span>
+
+
+<span class="c1">#    print(status)</span>
+<span class="c1">#    print(init_state)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">init_state</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+ 
+<div class="viewcode-block" id="open_channel"><a class="viewcode-back" href="../code.html#Visa_Functions.open_channel">[docs]</a><span class="k">def</span> <span class="nf">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Open switch channel</span>
+<span class="sd">    </span>
+<span class="sd">    The procedure for changing channels is:</span>
+<span class="sd">        </span>
+<span class="sd">        1. set output current to zero</span>
+<span class="sd">        </span>
+<span class="sd">        2. close the shorted line</span>
+<span class="sd">        </span>
+<span class="sd">        3. open any lines besides the shorted line</span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    :param Card: Targeted Card Address</span>
+<span class="sd">   </span>
+<span class="sd">    :param channel: Current Targeted Channel</span>
+<span class="sd">       </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_V2</span>
+<span class="sd">        </span>
+<span class="sd">        -Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">        -Resisitance Curve   </span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">desired_channel</span> <span class="o">=</span> <span class="s1">&#39;@&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;!&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+    
+    
+    <span class="c1">#Step 1    </span>
+    <span class="n">closed</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Switch</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;route:close:state?&#39;</span><span class="p">))</span> <span class="c1">#THIS IS GOING TO RETURN A STRING THAT DOESNT WORK WITH CLOSED</span>
+    
+    <span class="c1">#Step 2    </span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">25</span><span class="p">)</span>
+    
+    <span class="n">Switch</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;open (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span> <span class="n">desired_channel</span><span class="p">)</span> <span class="c1">#open the channel that was previously closed IF it wasnt the short</span></div>
+
+<div class="viewcode-block" id="close_channel"><a class="viewcode-back" href="../code.html#Visa_Functions.close_channel">[docs]</a><span class="k">def</span> <span class="nf">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    close switch channel</span>
+<span class="sd">    </span>
+<span class="sd">    The procedure for changing channels is:</span>
+<span class="sd">        </span>
+<span class="sd">            1. set output current to zero</span>
+<span class="sd">            </span>
+<span class="sd">            2. close the desired line</span>
+<span class="sd">            </span>
+<span class="sd">            3. open the shorted line</span>
+<span class="sd">    </span>
+<span class="sd">    :param Switch: Switch Address</span>
+<span class="sd">    </span>
+<span class="sd">    :param Card: Targeted Card Address</span>
+<span class="sd">   </span>
+<span class="sd">    :param channel: Current Targeted Channel</span>
+<span class="sd">       </span>
+<span class="sd">   Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_V2</span>
+<span class="sd">        </span>
+<span class="sd">        -Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">        -Resisitance Curve</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">desired_channel</span> <span class="o">=</span> <span class="s1">&#39;@&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;!&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+    
+ 
+    <span class="c1">#Step 2    </span>
+    <span class="n">Switch</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;close (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="n">desired_channel</span><span class="p">)</span> 
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">25</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="intialize_voltage"><a class="viewcode-back" href="../code.html#Visa_Functions.intialize_voltage">[docs]</a><span class="k">def</span> <span class="nf">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes voltmeter</span>
+<span class="sd">   </span>
+<span class="sd">    :param Voltmeter: The Voltmeter machine address  </span>
+<span class="sd">    </span>
+<span class="sd">    :param NPLC: Number of Power Line Cycles to average over</span>
+<span class="sd">    </span>
+<span class="sd">    :param Vrange: Voltage Range  </span>
+<span class="sd">    </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_V2</span>
+<span class="sd">        </span>
+<span class="sd">        -Resisitance Curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+ 
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*RST; status:preset; *cls&#39;</span><span class="p">)</span>
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;conf:volt:dc </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Vrange</span><span class="p">)</span> <span class="c1">#this is important!!!</span>
+    <span class="c1">#when vrange is set to auto or something small, sample speed is very slow (&lt;10 pts/second)</span>
+    <span class="c1">#To speed up sampling, set vrange = 1.</span>
+    
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;*sre 32&quot;</span><span class="p">)</span> <span class="c1">#not sure what this does either</span>
+
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;input:filter off&quot;</span><span class="p">)</span> <span class="c1">#Should be done manually with data in python</span>
+    
+    <span class="c1">#The following line sets the rate at which the voltmeter averages the data over (ie sampling rate)</span>
+    <span class="c1">##0.02, 0.2, 1, 2, 10, 20, 100, 200 where 0.02 is the fastest sampling rate and lowest averaging</span>
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;SENS:VOLT:DC:NPLC </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">nplc</span><span class="p">)</span> <span class="c1">#number of power line cycles to average over</span>
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;trigger:source bus&quot;</span><span class="p">)</span>
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;trigger:delay 0&quot;</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="read_voltage_fast"><a class="viewcode-back" href="../code.html#Visa_Functions.read_voltage_fast">[docs]</a><span class="k">def</span> <span class="nf">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">dwell_time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Passes in the voltmeter address instead of doing it in the function</span>
+<span class="sd">   </span>
+<span class="sd">    :param Voltmeter: The Voltmeter machine address  </span>
+<span class="sd">    </span>
+<span class="sd">    :param Dwell_time: Time to sleep</span>
+<span class="sd">   </span>
+<span class="sd">    :return: Measured_V-Measure Voltage    </span>
+<span class="sd">    </span>
+<span class="sd">    Called by:</span>
+<span class="sd">        </span>
+<span class="sd">        -Iv_Curve_V2</span>
+<span class="sd">        </span>
+<span class="sd">        -Resisitance Curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;initiate&quot;</span><span class="p">)</span>
+    <span class="n">Voltmeter</span><span class="o">.</span><span class="n">assert_trigger</span><span class="p">()</span>
+    <span class="n">measured_V</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Voltmeter</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;fetch?&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">measured_V</span></div>
+ 
+<span class="c1">##END The following functions were written to measure resistance</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

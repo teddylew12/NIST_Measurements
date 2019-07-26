@@ -1,0 +1,227 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Resistance_curve &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Resistance_curve</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jul 31 13:42:57 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">Visa_Functions</span> <span class="k">as</span> <span class="nn">vf</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">IV_curve_v3</span> <span class="k">as</span> <span class="nn">iv</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+<span class="n">nplc</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Vrange</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+<span class="n">VDwellTime</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-01</span>
+<span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">shorts</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span><span class="mi">40</span><span class="p">],</span><span class="mi">0</span><span class="p">,[</span><span class="mi">10</span><span class="p">,</span><span class="mi">40</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span> <span class="c1"># index corresponds to the card #, value is the short on that card</span>
+
+<div class="viewcode-block" id="plot_Resistance_Array_live"><a class="viewcode-back" href="../code.html#Resistance_curve.plot_Resistance_Array_live">[docs]</a><span class="k">def</span> <span class="nf">plot_Resistance_Array_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">,</span> <span class="n">max_current</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Plots a sweep from 0 to 3mA and returns the values plotted</span>
+<span class="sd">    Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    :param app: pyqtgraph construct</span>
+<span class="sd">    </span>
+<span class="sd">    :param curve: pyqtgraph constuct</span>
+<span class="sd">    </span>
+<span class="sd">    :param card1, card 2: Target card2</span>
+<span class="sd">    </span>
+<span class="sd">    :param channel1, channel2: Target Channels</span>
+<span class="sd">    </span>
+<span class="sd">    :param max_Current: max_current before function breaks</span>
+<span class="sd">    </span>
+<span class="sd">    :return: I-Values: Arrays of Current Values</span>
+<span class="sd">    </span>
+<span class="sd">    :return: V-Values: Array of Voltage Values</span>
+<span class="sd">    </span>
+<span class="sd">    :return: R-Values: Array of Resistance Values</span>
+<span class="sd">        </span>
+<span class="sd">    :return: Funykgraphs Any Sweeps that had non-linear slopes (Determined by Lin-regress)</span>
+<span class="sd">   </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measure_Via_Resistance</span>
+<span class="sd">        </span>
+<span class="sd">        -Measure_Device_Resistance</span>
+<span class="sd">        </span>
+<span class="sd">        -Resistance Curve</span>
+<span class="sd">        </span>
+<span class="sd">        -Measure_Resistor_Arrays</span>
+<span class="sd">        </span>
+<span class="sd">    Calls on:</span>
+<span class="sd">        </span>
+<span class="sd">        -All Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">    Uses:</span>
+<span class="sd">        </span>
+<span class="sd">        -Linregress to determine whether a graph is linear or not</span>
+<span class="sd">        </span>
+<span class="sd">        -Looks for a negative slope or an r^2 value below .9</span>
+<span class="sd">        </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>    
+    <span class="c1"># current initialization variables</span>
+    <span class="c1"># lower range has less noise</span>
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-02</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">30.</span>
+    
+    <span class="c1"># get GPIB instruments</span>
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">iv</span><span class="o">.</span><span class="n">shorts</span><span class="p">)</span>
+        
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># starting 7/24: voltmeter reads non zero when the current is zero</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Offset: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">offset</span><span class="p">)</span>
+    
+    <span class="c1">#Sweep Current up</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">max_current</span> <span class="o">/</span> <span class="mi">30</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepUp Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+    
+    
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_current</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+        
+        <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+        <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+        <span class="c1"># new, for fixing the offset 7/24:</span>
+        <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        
+        <span class="c1"># live plotting</span>
+        <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1"> &#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">go</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># input passed from GUI</span>
+            <span class="n">iv</span><span class="o">.</span><span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">CurrentSource</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    <span class="n">funkygraphs</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">m</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">stdev</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">=</span><span class="n">r2</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">r2</span><span class="o">&lt;=.</span><span class="mi">9</span><span class="p">:</span>
+        <span class="n">funkygraphs</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">iv</span><span class="o">.</span><span class="n">shorts</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span><span class="p">,</span> <span class="n">funkygraphs</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

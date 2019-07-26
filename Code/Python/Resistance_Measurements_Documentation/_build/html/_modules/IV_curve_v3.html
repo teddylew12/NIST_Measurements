@@ -1,0 +1,1208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>IV_curve_v3 &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for IV_curve_v3</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri May 26 14:26:21 2017</span>
+<span class="sd">Purpose of this code is to sweep the current and plot an IV curve</span>
+<span class="sd">@author: JPulecio</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#=================================</span>
+<span class="c1">#Import libraries</span>
+<span class="c1">#=================================</span>
+<span class="kn">import</span> <span class="nn">Visa_Functions</span> <span class="k">as</span> <span class="nn">vf</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+<span class="c1">#=================================</span>
+<span class="c1">#Global variables</span>
+<span class="c1">#=================================</span>
+
+<span class="n">address_I_yoko_GS200</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">address_I_yoko_GS610</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">address_V</span> <span class="o">=</span> <span class="mi">23</span>
+<span class="n">address_Switch</span> <span class="o">=</span> <span class="mi">26</span>
+<span class="n">short</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="c1">#TODO move the following to Vf, makes it more global (used by other sweeps)</span>
+<span class="n">shorts</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span><span class="mi">40</span><span class="p">],</span><span class="mi">0</span><span class="p">,[</span><span class="mi">10</span><span class="p">,</span><span class="mi">40</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span> <span class="c1"># index corresponds to the card #, value is the short on that card</span>
+<span class="n">nplc</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Vrange</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+<span class="n">VDwellTime</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-03</span>
+<span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">2.</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;Z:\JPulecio\Code\Python\Resistance_Measurements\data</span><span class="se">\\</span><span class="s1">&#39;</span>
+<span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Voltage over time&quot;</span>
+<span class="n">xlabel</span> <span class="o">=</span> <span class="s2">&quot;sample&quot;</span>
+<span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;V&quot;</span>
+<span class="c1">#=================================</span>
+<span class="c1">#Function definitions</span>
+<span class="c1">#=================================  </span>
+
+<div class="viewcode-block" id="sweep_current_live"><a class="viewcode-back" href="../code.html#IV_curve_v3.sweep_current_live">[docs]</a><span class="k">def</span> <span class="nf">sweep_current_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">current_point</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inputs:</span>
+<span class="sd">    :param app, curve: (both pyqtgraph constructs)</span>
+<span class="sd">    </span>
+<span class="sd">    :param current_point: pyqtgraph contruct used to plot current point</span>
+<span class="sd">   </span>
+<span class="sd">    :param number_of_sweeps: number of sweeps to complete</span>
+<span class="sd">    </span>
+<span class="sd">    :param I_min: current sweep start</span>
+<span class="sd">   </span>
+<span class="sd">    :param I_maxcurrent: sweep stop</span>
+<span class="sd">    </span>
+<span class="sd">    :param step: increment</span>
+<span class="sd">   </span>
+<span class="sd">    :param card1, card2: Target Cards 1 and 2</span>
+<span class="sd">   </span>
+<span class="sd">    :param channel1,channel 2: Target Channels</span>
+<span class="sd">   </span>
+<span class="sd">   </span>
+<span class="sd">    :return: I,V,R arrays</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">      -Measure_Resistance</span>
+<span class="sd">      </span>
+<span class="sd">      -Automate_channel_IV_live</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        All Visa Functions</span>
+<span class="sd">         </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># current initialization variables</span>
+    <span class="c1"># lower range has less noise</span>
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-02</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">2.</span>
+    
+    <span class="c1"># get GPIB instruments</span>
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+
+    <span class="c1"># Initialize the switch matrix</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">channel1</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>    
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>    
+    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># current point array</span>
+    <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># voltmeter reads non zero when the current is zero</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Offset: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">offset</span><span class="p">)</span>
+    
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#Sweep Current up</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepUp Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+                
+                <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+                <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+                <span class="c1"># For fixing the offset</span>
+                <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+                
+                <span class="c1"># put current point in an array to plot in a different color</span>
+                <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+                <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                
+                <span class="c1"># live plotting</span>
+                <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+                <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+                
+                <span class="c1"># empty the current point array</span>
+                <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                <span class="c1"># input from GUI</span>
+                <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+                
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1"> &#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            
+            <span class="c1"># handle keyboard event    </span>
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+        <span class="c1">#Sweep Current down</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepDown Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_max</span><span class="o">-</span><span class="n">step</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="o">-</span><span class="n">step</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+                <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+                <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+                <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+                
+                <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+                <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                    
+                <span class="c1"># live plotting </span>
+                <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+                <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+                
+                <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                <span class="k">if</span> <span class="n">go</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+                
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+        
+        <span class="c1"># clear out the different colored current point</span>
+        <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">([],[])</span>
+
+    <span class="c1"># turn it off and be ready to switch channels</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># open channels that were just measured</span>
+    <span class="c1"># 10 is always sort, is this necessary</span>
+    <span class="k">if</span> <span class="n">channel1</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span></div>
+
+
+<div class="viewcode-block" id="exitfunc"><a class="viewcode-back" href="../code.html#IV_curve_v3.exitfunc">[docs]</a><span class="k">def</span> <span class="nf">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        </span>
+<span class="sd">    :param Switch: GPIB switch matrix object </span>
+<span class="sd">     </span>
+<span class="sd">    :param CurrentSource: GPIB current source object </span>
+<span class="sd">   </span>
+<span class="sd">    :param card1, card2: Target Cards 1 and 2</span>
+<span class="sd">    </span>
+<span class="sd">    :param channel1, channel2: Target Channels 1 and 2</span>
+<span class="sd">           </span>
+<span class="sd">    :return: exits sweep cleanly</span>
+<span class="sd">    </span>
+<span class="sd">    Called by: </span>
+<span class="sd">        </span>
+<span class="sd">        -Virtually all functions in IV_curve_v2</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">stop</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">0</span>
+    
+
+<span class="k">def</span> <span class="nf">turn_current_off</span><span class="p">():</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="sweep_current_live_Rn"><a class="viewcode-back" href="../code.html#IV_curve_v3.sweep_current_live_Rn">[docs]</a><span class="k">def</span> <span class="nf">sweep_current_live_Rn</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">V_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">,</span><span class="n">dev</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      </span>
+<span class="sd">    :param app, curve: (both pyqtgraph constructs)</span>
+<span class="sd">    </span>
+<span class="sd">    :param number_of_sweeps: number of sweeps to complete</span>
+<span class="sd">    </span>
+<span class="sd">    :param I_min: current sweep start</span>
+<span class="sd">   </span>
+<span class="sd">    :param I_maxcurrent: sweep stop</span>
+<span class="sd">    </span>
+<span class="sd">    :param step: increment</span>
+<span class="sd">   </span>
+<span class="sd">    :param card1, card 2: Target Cards</span>
+<span class="sd">   </span>
+<span class="sd">    :param channel1,channel 2: Target Channels</span>
+<span class="sd">   </span>
+<span class="sd">    :param dev: Target device</span>
+<span class="sd">   </span>
+<span class="sd">    </span>
+<span class="sd">    :return: I,V,R arrays</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">      -Get Rn Imax </span>
+<span class="sd">      </span>
+<span class="sd">      -Get Rn Imax and save</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        All Visa Functions</span>
+<span class="sd">        </span>
+<span class="sd">    FINDS LINEAR SLOPE:</span>
+<span class="sd">    First checks for hitting Vmax</span>
+<span class="sd">    Next checks for expected length based on size of JJ</span>
+<span class="sd">    then looks for 4 collinear point (using stats.linregress) </span>
+<span class="sd">    then looks at most recent sets of points</span>
+<span class="sd">    if all still linear will exit</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># current initialization variabels </span>
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mf">200e-03</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">current_limit</span> <span class="o">=</span> <span class="mf">30e-03</span> <span class="c1"># This is highest possible current in A. Shouldn&#39;t get this high</span>
+    
+    <span class="c1"># get GPIB instruments</span>
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+    
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+
+    <span class="c1">#Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>
+    
+   
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">):</span>
+        <span class="c1">#Sweep Current up</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepUp Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="n">V</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">prev_slope</span><span class="o">=</span><span class="p">[]</span>
+        <span class="c1">#measure of how close the previous and current slopes need to be to break</span>
+        <span class="n">sigma</span><span class="o">=.</span><span class="mi">05</span>
+        <span class="c1">#how soon to start checking for RN</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mi">100</span>
+        <span class="n">expected_length</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">30</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">dev</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expected length: &quot;</span><span class="p">,</span><span class="n">expected_length</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_min</span><span class="p">,</span> <span class="n">current_limit</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1"> &#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">I</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+          
+            <span class="k">if</span> <span class="n">V</span> <span class="o">&gt;=</span> <span class="n">V_max</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;V_max reached&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            
+            <span class="c1">#Check for negative to positive first r derivative</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_values</span><span class="p">)</span><span class="o">&gt;</span><span class="n">expected_length</span><span class="p">:</span>
+                <span class="c1">#check for jumps due to thermal </span>
+                <span class="n">jumptuner</span><span class="o">=</span><span class="mi">2</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">V_values</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="n">jumptuner</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">V_values</span><span class="p">)[</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Break due to thermal jump&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="n">first_deriv</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">second_deriv</span><span class="o">=</span><span class="p">[]</span>
+               <span class="c1"># first_deriv= np.diff(V_values)/np.diff(I_values)</span>
+               <span class="c1"># second_deriv=np.diff(first_deriv)/np.diff(I_values)</span>
+                <span class="n">first_deriv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">V_values</span><span class="p">)</span>
+                <span class="n">second_deriv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">first_deriv</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">second_deriv</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:])</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">second_deriv</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">second_deriv</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Break due to inflection&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                OLD METHOD-WOULD STOP BEFORE INFLECTION</span>
+<span class="sd">                checkslope_y=I_values[-5:]</span>
+<span class="sd">                checkslope_x=V_values[-5:]</span>
+<span class="sd">                m,b,r2,p,stdev=stats.linregress(checkslope_x,checkslope_y)</span>
+<span class="sd">                r2=r2**2</span>
+<span class="sd">                prev_slope.append(m)</span>
+<span class="sd">                #stops current sweep when 4 mostly collinear points are found</span>
+<span class="sd">                #using linregress but also checks slope of 4 points before it</span>
+<span class="sd">                if len(prev_slope)&gt;4:</span>
+<span class="sd">                    if r2&gt;.98  and prev_slope[-3]-prev_slope[-1]&lt;=sigma*prev_slope[-1]:</span>
+<span class="sd">                        break</span>
+<span class="sd">                    &#39;&#39;&#39;</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exiting&quot;</span><span class="p">)</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span></div>
+
+
+<div class="viewcode-block" id="open_data"><a class="viewcode-back" href="../code.html#IV_curve_v3.open_data">[docs]</a><span class="k">def</span> <span class="nf">open_data</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the values of I, V, R and plots data</span>
+<span class="sd">    </span>
+<span class="sd">    if newplot == 1 it will plot the file in new plot window otherwise it will plot it on same window</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span> <span class="c1">#opens new plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;I&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span> 
+    <span class="n">plt</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s1">&#39;sci&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">scilimits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span></div>
+
+
+<div class="viewcode-block" id="find_max_y_change"><a class="viewcode-back" href="../code.html#IV_curve_v3.find_max_y_change">[docs]</a><span class="k">def</span> <span class="nf">find_max_y_change</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_JJ</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Uses an envelope around zero based on num_JJ</span>
+<span class="sd"> </span>
+<span class="sd">  :param x,y: I,V arrays</span>
+<span class="sd">  </span>
+<span class="sd">  :param num_JJ: number of JJs</span>
+<span class="sd">       </span>
+<span class="sd">  :return: Critical Currents-First point to enter bounds and last point to exit</span>
+<span class="sd">  </span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="k">if</span> <span class="n">num_JJ</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">bound</span> <span class="o">=</span> <span class="n">num_JJ</span> <span class="o">*</span> <span class="mf">0.25e-06</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="n">bound</span> <span class="o">=</span> <span class="n">num_JJ</span> <span class="o">*</span> <span class="mf">10e-06</span>
+  <span class="n">y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">max_y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">sweep_up</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">sweep_down</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">step</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">critical_currents</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#holds the critical currents found in graph</span>
+  
+  <span class="c1">#find minumim in list</span>
+  <span class="n">min_x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="c1"># min of a generator</span>
+  <span class="n">max_x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="c1"># min of a generator</span>
+  
+  <span class="k">if</span> <span class="p">(</span><span class="n">min_x</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mf">0.0</span> <span class="ow">or</span> <span class="o">-</span><span class="mf">0.0</span><span class="p">):</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Postive half sweep&quot;</span><span class="p">)</span>
+      <span class="n">sweep_flag</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#means only positive sweep</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Negative number found Full sweep&quot;</span><span class="p">)</span>
+      <span class="n">sweep_flag</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1">#means only full IV sweep</span>
+
+  <span class="n">position1</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">n1</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">avg_y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  
+  <span class="c1">#find avg change in y</span>
+  <span class="k">for</span> <span class="n">n0</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+      <span class="n">y_change</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span>
+      <span class="n">avg_y_change</span> <span class="o">=</span> <span class="p">(</span><span class="n">avg_y_change</span> <span class="o">+</span> <span class="n">y_change</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n0</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="n">enter_index</span> <span class="o">=</span><span class="p">[]</span>
+  <span class="n">leave_index</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="k">for</span> <span class="n">n1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">sweep_up</span><span class="p">):</span> 
+      
+      <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span><span class="o">&gt;=-</span><span class="n">bound</span><span class="p">:</span>
+          <span class="n">enter_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">bound</span><span class="p">:</span>
+              <span class="n">leave_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">leave_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># critical currents were found</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enter_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leave_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span> <span class="c1"># critical currents were not found, append the middle point</span>
+  <span class="c1"># should probably change this to not append anything, then error catch in measure_Ic</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span> 
+          
+  <span class="n">n2</span> <span class="o">=</span> <span class="n">sweep_up</span> <span class="o">+</span><span class="mi">1</span> 
+
+  <span class="n">enter_index</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">leave_index</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="c1">#Find max change in y for the second half of data</span>
+  <span class="k">for</span> <span class="n">n2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sweep_up</span><span class="p">,</span> <span class="n">sweep_down</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">bound</span><span class="p">:</span>
+          <span class="n">enter_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">bound</span><span class="p">:</span>
+              <span class="n">leave_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+              
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">leave_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># critical currents were found</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enter_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leave_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span> <span class="c1"># critical currents were not found, append the middle point</span>
+  <span class="c1"># should probably change this to not append anything, then error catch in measure_Ic</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span>
+  
+  <span class="k">return</span> <span class="n">critical_currents</span></div>
+
+<div class="viewcode-block" id="find_max_y_change_half_sweep"><a class="viewcode-back" href="../code.html#IV_curve_v3.find_max_y_change_half_sweep">[docs]</a><span class="k">def</span> <span class="nf">find_max_y_change_half_sweep</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_JJ</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">   Uses an envelope around zero based on num_JJ</span>
+<span class="sd"> </span>
+<span class="sd">  :param x,y: I,V arrays</span>
+<span class="sd">  </span>
+<span class="sd">  :param num_JJ: number of JJs</span>
+<span class="sd">       </span>
+<span class="sd">  :return: Critical Currents-First point to enter bounds and last point to exit</span>
+<span class="sd">  </span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="k">if</span> <span class="n">num_JJ</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">bound</span> <span class="o">=</span> <span class="n">num_JJ</span> <span class="o">*</span> <span class="mf">0.25e-06</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="n">bound</span> <span class="o">=</span> <span class="n">num_JJ</span> <span class="o">*</span> <span class="mf">2e-06</span>
+  <span class="n">y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">max_y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">sweep_up</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">sweep_down</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">step</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">critical_currents</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#holds the critical currents found in graph</span>
+  
+  
+
+  <span class="n">position1</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">n1</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">avg_y_change</span> <span class="o">=</span> <span class="mi">0</span>
+  
+  <span class="c1">#find avg change in y</span>
+  <span class="k">for</span> <span class="n">n0</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+      <span class="n">y_change</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">])</span>
+      <span class="n">avg_y_change</span> <span class="o">=</span> <span class="p">(</span><span class="n">avg_y_change</span> <span class="o">+</span> <span class="n">y_change</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n0</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="n">enter_index</span> <span class="o">=</span><span class="p">[]</span>
+  <span class="n">leave_index</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="k">for</span> <span class="n">n1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">sweep_up</span><span class="p">):</span> 
+      
+      <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span><span class="o">&gt;=-</span><span class="n">bound</span><span class="p">:</span>
+          <span class="n">enter_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">bound</span><span class="p">:</span>
+              <span class="n">leave_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">leave_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># critical currents were found</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leave_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span> <span class="c1"># critical currents were not found, append the middle point</span>
+  <span class="c1"># should probably change this to not append anything, then error catch in measure_Ic</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span>
+      
+          
+  <span class="n">n2</span> <span class="o">=</span> <span class="n">sweep_up</span> <span class="o">+</span><span class="mi">1</span> 
+
+  <span class="n">enter_index</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">leave_index</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c1">#Find max change in y for the second half of data</span>
+  <span class="k">for</span> <span class="n">n2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sweep_up</span><span class="p">,</span> <span class="n">sweep_down</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">bound</span><span class="p">:</span>
+          <span class="n">enter_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">bound</span><span class="p">:</span>
+              <span class="n">leave_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+              
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enter_index</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># critical currents were found</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enter_index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span> <span class="c1"># critical currents were not found, append the middle point</span>
+  <span class="c1"># should probably change this to not append anything, then error catch in measure_Ic</span>
+      <span class="n">critical_currents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sweep_up</span> <span class="o">-</span> <span class="n">sweep_down</span><span class="p">))</span>
+  
+  <span class="k">return</span> <span class="n">critical_currents</span></div>
+
+
+<div class="viewcode-block" id="sweep_current_live_variable_points"><a class="viewcode-back" href="../code.html#IV_curve_v3.sweep_current_live_variable_points">[docs]</a><span class="k">def</span> <span class="nf">sweep_current_live_variable_points</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">current_point</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">,</span> <span class="n">optionalic</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This plot will be very dense in points around the estimated ic</span>
+<span class="sd">    </span>
+<span class="sd">    :param app, curve: (both pyqtgraph constructs)</span>
+<span class="sd">    </span>
+<span class="sd">    :param number_of_sweeps: number of sweeps to complete</span>
+<span class="sd">    </span>
+<span class="sd">    :param current_point: pyqtgraph contruct used to plot current point</span>
+<span class="sd">    </span>
+<span class="sd">    :param I_min: current sweep start</span>
+<span class="sd">   </span>
+<span class="sd">    :param I_maxcurrent: sweep stop</span>
+<span class="sd">    </span>
+<span class="sd">    :param step: increment</span>
+<span class="sd">   </span>
+<span class="sd">    :param card1, card2: Target Cards</span>
+<span class="sd">   </span>
+<span class="sd">    :param channel1, channel2: Target Channels</span>
+<span class="sd">   </span>
+<span class="sd">    :param dev: Target device</span>
+<span class="sd">   </span>
+<span class="sd">    </span>
+<span class="sd">    :return: I,V,R arrays</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">      -Get Rn Imax </span>
+<span class="sd">      </span>
+<span class="sd">      -Get Rn Imax and save</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        All Visa Functions</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># current initialization variables</span>
+    <span class="c1"># lower range has less noise</span>
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-03</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">2.</span>
+    
+    <span class="c1"># get GPIB instruments</span>
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># array to hold current point</span>
+    <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+    
+
+    <span class="c1"># offset</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+    
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">optionalic</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">estimated_Ic</span> <span class="o">=</span> <span class="n">optionalic</span>
+    <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># ** location for hard-coded estimated Ic ** </span>
+        <span class="n">estimated_Ic</span> <span class="o">=</span> <span class="mf">200e-6</span>
+
+    <span class="c1"># set up the ranges</span>
+    <span class="n">range1</span> <span class="o">=</span> <span class="n">estimated_Ic</span> <span class="o">*</span> <span class="mf">0.8</span>
+    <span class="n">range2</span> <span class="o">=</span> <span class="n">estimated_Ic</span> <span class="o">*</span> <span class="mf">1.2</span>
+    <span class="n">range3</span> <span class="o">=</span> <span class="n">estimated_Ic</span> <span class="o">*</span> <span class="mf">3.7</span>
+    
+    <span class="c1"># different density of points</span>
+    <span class="n">step_less_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">range1</span><span class="p">)</span><span class="o">/</span><span class="mi">50</span>
+    <span class="n">step_alot_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">range2</span><span class="o">-</span><span class="n">range1</span><span class="p">)</span><span class="o">/</span><span class="mi">400</span>
+    
+    <span class="c1"># start with lower density points</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">range1</span><span class="p">,</span> <span class="n">step_less_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="c1"># for fixing the offset</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="c1"># current point</span>
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span> <span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>    
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+    <span class="c1"># step with alot of points</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">range1</span><span class="p">,</span> <span class="n">range2</span><span class="p">,</span> <span class="n">step_alot_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+    
+            <span class="c1"># for fixing the offset</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="c1"># current point</span>
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+            
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+    <span class="c1"># Less points for rest of sweep</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">range2</span><span class="p">,</span> <span class="n">range3</span><span class="p">,</span> <span class="n">step_less_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+
+            <span class="c1"># for fixing the offset:</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+
+    <span class="c1">#Sweep Current down less points</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">range3</span><span class="o">-</span><span class="n">step_less_points</span><span class="p">,</span> <span class="n">range2</span><span class="p">,</span> <span class="o">-</span><span class="n">step_less_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+    <span class="c1"># Sweep down with alot of points around the estimated Ic</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">range2</span><span class="o">-</span><span class="n">step_alot_points</span><span class="p">,</span> <span class="n">range1</span><span class="p">,</span> <span class="o">-</span><span class="n">step_alot_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    
+
+    <span class="c1"># final sweep with less points</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">range1</span><span class="o">-</span><span class="n">step_less_points</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">step_less_points</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="n">current_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">current_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">current_point</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            
+            <span class="n">current_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+
+    <span class="c1"># turn it all off, ready for next</span>
+    <span class="n">exitfunc</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">CurrentSource</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span></div>
+
+
+<div class="viewcode-block" id="automate_channel_IV_live"><a class="viewcode-back" href="../code.html#IV_curve_v3.automate_channel_IV_live">[docs]</a><span class="k">def</span> <span class="nf">automate_channel_IV_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">current_point</span><span class="p">,</span> <span class="n">cards</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">currents</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">optionalic</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Automates the sweep_current_live function for multiple channels</span>
+<span class="sd">    </span>
+<span class="sd">    :param app, curve: (both pyqtgraph constructs)</span>
+<span class="sd">    </span>
+<span class="sd">    :param current_point: pyqtgraph contruct used to plot current point</span>
+<span class="sd">    </span>
+<span class="sd">    :param card: Target Card</span>
+<span class="sd">    </span>
+<span class="sd">    :param channels: Array of Target Channels</span>
+<span class="sd">    </span>
+<span class="sd">    :param currents: Array of currents, 0=I_min,1=Imax</span>
+<span class="sd">    </span>
+<span class="sd">    :param step: increment</span>
+<span class="sd">    </span>
+<span class="sd">    :param number_of_sweeps: number of sweeps to complete</span>
+<span class="sd">   </span>
+<span class="sd">    :param optionalic: Optional Ic for sweep_current_live_variable_points</span>
+<span class="sd">    </span>
+<span class="sd">    :return: I,V,R arrays</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Get Rn Imax </span>
+<span class="sd">      </span>
+<span class="sd">        -Get Rn Imax and save</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        -sweep_current_live_variable_points</span>
+<span class="sd">        </span>
+<span class="sd">        -sweep_current_live</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">I_min</span> <span class="o">=</span> <span class="n">currents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">I_max</span> <span class="o">=</span> <span class="n">currents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">channel_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">channel_pairs</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">channel1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">channel2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">card1</span> <span class="o">=</span> <span class="n">cards</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">card2</span> <span class="o">=</span> <span class="n">cards</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="c1">#        print(&quot;card1: %s channel1: %s\ncard2: %s channel2: %s&quot;%(card1, channel1, card2, channel2))</span>
+        <span class="k">if</span> <span class="n">optionalic</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">sweep_current_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">current_point</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">sweep_current_live_variable_points</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">current_point</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">,</span> <span class="n">optionalic</span><span class="o">=</span><span class="n">optionalic</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span></div>
+
+<span class="k">def</span> <span class="nf">calc_steps</span><span class="p">(</span><span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">number</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">I_max</span><span class="o">-</span><span class="n">I_min</span><span class="p">)</span><span class="o">/</span><span class="n">step</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">step</span>
+
+<div class="viewcode-block" id="sweep_current_live_GUI"><a class="viewcode-back" href="../code.html#IV_curve_v3.sweep_current_live_GUI">[docs]</a><span class="k">def</span> <span class="nf">sweep_current_live_GUI</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Automates the sweep_current_live function for the older GUI</span>
+<span class="sd">    </span>
+<span class="sd">    :param app, curve: (both pyqtgraph constructs)</span>
+<span class="sd">  </span>
+<span class="sd">    :param number_of_sweeps: number of sweeps to complete</span>
+<span class="sd">    </span>
+<span class="sd">    :param I_min, I_max: Respective max and min current values</span>
+<span class="sd">    </span>
+<span class="sd">    :param step: step size</span>
+<span class="sd">    </span>
+<span class="sd">    :param card1, card2: Target Cards 1 and 2</span>
+<span class="sd">    </span>
+<span class="sd">    :param channel1, channel2: Target Channels 1 and 2</span>
+<span class="sd">    </span>
+<span class="sd">    :return: I,V,R arrays</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Updates a live plot with current on x axis, voltage on y axis</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Get Rn Imax </span>
+<span class="sd">      </span>
+<span class="sd">        -Get Rn Imax and save</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        -sweep_current_live_variable_points</span>
+<span class="sd">        </span>
+<span class="sd">        -sweep_current_live</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># current initialization variables</span>
+    <span class="c1"># lower range has less noise</span>
+
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mf">1e-02</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">10.</span>
+
+    <span class="c1"># get GPIB instruments</span>
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+
+    <span class="c1"># different init. for squids vs. pcm</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch_all</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card2</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span> <span class="c1"># instead of card, used to be 1</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="c1"># starting 7/24: voltmeter reads non zero when the current is zero</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Offset: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">offset</span><span class="p">)</span>
+
+    <span class="k">global</span> <span class="n">go</span>
+    <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#Sweep Current up</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">):</span>
+        <span class="n">I_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+        <span class="k">if</span> <span class="n">n</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">curves</span><span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([],[])</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepUpbb Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="c1"># new, for fixing the offset 7/24:</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curves</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">pen</span> <span class="o">=</span> <span class="n">color</span><span class="p">,</span><span class="n">symbolBrush</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1"> &#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="c1">#Sweep Current down</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepDown Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_max</span><span class="o">-</span><span class="n">step</span><span class="p">,</span> <span class="n">I_min</span><span class="p">,</span> <span class="o">-</span><span class="n">step</span><span class="p">):</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">I_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="c1"># live plotting</span>
+            <span class="n">curves</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">symbolBrush</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">go</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_short</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card1</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card1</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span></div>
+    
+<div class="viewcode-block" id="save_data_live"><a class="viewcode-back" href="../code.html#IV_curve_v3.save_data_live">[docs]</a><span class="k">def</span> <span class="nf">save_data_live</span><span class="p">(</span><span class="n">I_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves the raw data as ASCII seperated by tab</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">column</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_values</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">column</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_values</span>
+    <span class="n">data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">V_values</span>
+    <span class="n">data</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">R_values</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;col1: I, col2: V, col3: R </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">calc_steps</span><span class="p">(</span><span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">number</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">I_max</span><span class="o">-</span><span class="n">I_min</span><span class="p">)</span><span class="o">/</span><span class="n">step</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">step</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

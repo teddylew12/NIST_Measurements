@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Server/ DB Reference &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="server-db-reference">
+<h1>Server/ DB Reference<a class="headerlink" href="#server-db-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="starting-the-servers">
+<h2>Starting the Servers<a class="headerlink" href="#starting-the-servers" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">There must always be an anaconda command prompt open, which is running all 3 of the server ports simultaneously</p>
+</li>
+<li><dl class="first docutils">
+<dt>If there is a problem with the servers, the first check would be to see if this windows is open. If not, the servers may have to be started</dt>
+<dd><ul class="first last simple">
+<li>If they are open and there are issues, CTRL+BREAK (break/pause button) and restart the servers</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">To start the servers, open any command prompt and run (the cd may not be necessary):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">volt</span><span class="o">.</span><span class="mi">686</span><span class="n">QVACTEST</span>
+<span class="n">begin_servers</span><span class="o">.</span><span class="n">cmd</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">This should run 3 separate processes in the same window and begin the servers hosting the SQL database, this homepage, the DB view, and report.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="under-the-hood">
+<h2>Under the Hood<a class="headerlink" href="#under-the-hood" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>There are four main things that happen if everything is to be run smoothly:</li>
+<li><dl class="first docutils">
+<dt>The mysql database is started (not sure how necessary)</dt>
+<dd><ul class="first last">
+<li>located in MariaDB/mariadb-10.2.12-winx64/mariadb-10.2.12-winx64/bin</li>
+<li>command is mysqld –console</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>The static homepage is served through the http.server python built-in</dt>
+<dd><ul class="first last">
+<li>done by cd’ing into html directory and running python -m http.server [port #] (we use 8000)</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>The flask page for the DB is started</dt>
+<dd><ul class="first last">
+<li>JPulecioFlaskflask-admin-run1flask_test3.py</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>The flask page for the report is started</dt>
+<dd><ul class="first last">
+<li>JPulecioFlaskReportsapp.py</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Server/ DB Reference</a><ul>
+<li><a class="reference internal" href="#starting-the-servers">Starting the Servers</a></li>
+<li><a class="reference internal" href="#under-the-hood">Under the Hood</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/servers.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

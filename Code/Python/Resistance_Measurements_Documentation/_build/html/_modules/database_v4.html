@@ -1,0 +1,953 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>database_v4 &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for database_v4</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Jun 30 16:52:50 2017</span>
+
+<span class="sd">@author: javier pulecio</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="k">as</span> <span class="nn">sa</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="k">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">DECIMAL</span><span class="p">,</span> <span class="n">ARRAY</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">relationship</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="n">sa</span><span class="o">.</span><span class="n">__version__</span>
+
+<span class="c1">#global variables</span>
+<span class="n">Ic_range_scale</span> <span class="o">=</span> <span class="mf">2.1</span> <span class="c1">#Ic_range_scale sets the min and max sweep values for the IV curves</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">create_engine</span><span class="p">(</span><span class="s2">&quot;mysql+pymysql://volt:pass@132.163.82.9/seg_sfq_v0&quot;</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pool_recycle</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
+<span class="c1">#Base class for objects</span>
+<span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
+<span class="c1">#Lets create our base classes</span>
+
+<span class="c1">#Lets define our design_devices many to many assoication table</span>
+<span class="n">design_devices</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;design_devices&#39;</span><span class="p">,</span> <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;design_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;device_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;device.id&#39;</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="Wafer"><a class="viewcode-back" href="../code.html#database_v4.Wafer">[docs]</a><span class="k">class</span> <span class="nc">Wafer</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;wafer&#39;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+    <span class="n">Jc_approx</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Wafer(name=&#39;</span><span class="si">%s</span><span class="s2">&#39;, date=&#39;</span><span class="si">%s</span><span class="s2">&#39;, Jc_approx=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Jc_approx</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Chip"><a class="viewcode-back" href="../code.html#database_v4.Chip">[docs]</a><span class="k">class</span> <span class="nc">Chip</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;chip&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">wafer_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;wafer.id&#39;</span><span class="p">))</span>
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Chip(name=&#39;</span><span class="si">%s</span><span class="s2">&#39;, location=&#39;</span><span class="si">%s</span><span class="s2">&#39;, wafer_id=&#39;</span><span class="si">%s</span><span class="s2">&#39;, design_id=&#39;</span><span class="si">%s</span><span class="s2">&#39; )&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wafer_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Design"><a class="viewcode-back" href="../code.html#database_v4.Design">[docs]</a><span class="k">class</span> <span class="nc">Design</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="s1">&#39;This takes in name of the device and string of tuples (device type, number of devices, junction radius in um, pads, channels)&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;design&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+    
+    <span class="n">device_id</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Device&quot;</span><span class="p">,</span> <span class="n">secondary</span><span class="o">=</span><span class="n">design_devices</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;design_id&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Design(name=&#39;</span><span class="si">%s</span><span class="s2">&#39;, date=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Device"><a class="viewcode-back" href="../code.html#database_v4.Device">[docs]</a><span class="k">class</span> <span class="nc">Device</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span><span class="o">=</span><span class="s1">&#39;device&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">device_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">JJ_radius_nom</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">pads</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">card</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">card1</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">card2</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">channel1</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">channel2</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
+
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Design&quot;</span><span class="p">,</span> <span class="n">secondary</span><span class="o">=</span><span class="n">design_devices</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s1">&#39;device_id&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="c1">#        return &quot;&lt;Device(device_name=%s, device_type=&#39;%s&#39;, num_JJs=&#39;%d&#39;, JJ_radius_nom=&#39;%f&#39;)&gt;&quot; %(self.name, self.device_type, self.num_JJs, self. JJ_radius_nom)</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Device(device_name=</span><span class="si">%s</span><span class="s2">, device_type=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JJ_Measurement"><a class="viewcode-back" href="../code.html#database_v4.JJ_Measurement">[docs]</a><span class="k">class</span> <span class="nc">JJ_Measurement</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="s1">&#39;This takes in name of the device and string of tuples (device type, number of devices, junction radius in um, pads, channels)&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;jj_measurement&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#date measurement was taken</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#time measurement was taken</span>
+    <span class="n">chip_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;chip.id&#39;</span><span class="p">))</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">))</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">JJ_radius_nom</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">data_directory</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span> <span class="c1">#directory with data</span>
+
+    <span class="c1">#Default jj_measurements</span>
+    <span class="n">Ic_pos</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The critical current positive side of IV curve</span>
+    <span class="n">Ic_neg</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The critical current negative side of IV curve</span>
+    <span class="n">Iret_pos</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The return critical current postive side of IV curve which depending on the damping below should show some slight hysteresis (i.e. slight difference between Ic and Iret)</span>
+    <span class="n">Iret_neg</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The return critical current postive side of IV curve which depending on the damping below should show some slight hysteresis (i.e. slight difference between Ic and Iret)</span>
+    <span class="n">Imax</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#Max current before heating</span>
+    <span class="n">Rn</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#Normal resistance which should be near the superconducting band gap. Due to heating we can measure the normal resistance slightly below the superconduting band gap.</span>
+    <span class="n">Iret_Ic_ratio</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#This is an approximation of Beta which is the damping of the circuit. Ideally [underdamped] 0.9 &lt; Beta &gt; 1.0 [overdamped]. If the circuit is overdamped then it will not work at higher frequencies (~100GHz)</span>
+    <span class="n">Ic_Rn_product</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Rn_Area_product</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Inverse_sqrtRn</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">sqrtIc</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_roomTemp</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#room temperature R</span>
+    <span class="n">Jc_nom</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DECIMAL</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span> <span class="c1">#The critical current density Jc = Ic/Area of junction</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;JJ_Measurement(measurement_id=&#39;</span><span class="si">%s</span><span class="s2">&#39;,device_name=&#39;</span><span class="si">%s</span><span class="s2">&#39;, num_JJs=&#39;</span><span class="si">%d</span><span class="s2">&#39;, JJ_radius=&#39;</span><span class="si">%f</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_JJs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Squid_Measurement"><a class="viewcode-back" href="../code.html#database_v4.Squid_Measurement">[docs]</a><span class="k">class</span> <span class="nc">Squid_Measurement</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="s1">&#39;Squid Measurement&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;squid_measurement&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#date measurement was taken</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#time measurement was taken</span>
+    <span class="n">chip_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;chip.id&#39;</span><span class="p">))</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">))</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">data_directory</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span> <span class="c1">#directory with data</span>
+
+    <span class="c1">#Default squid_measurements</span>
+    <span class="n">Ic_pos</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The critical current positive side of IV curve</span>
+    <span class="n">Ic_neg</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The critical current negative side of IV curve</span>
+    <span class="n">Iret_pos</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The return critical current postive side of IV curve which depending on the damping below should show some slight hysteresis (i.e. slight difference between Ic and Iret)</span>
+    <span class="n">Iret_neg</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#The return critical current postive side of IV curve which depending on the damping below should show some slight hysteresis (i.e. slight difference between Ic and Iret)</span>
+    <span class="n">Imax</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#Max current before heating</span>
+    <span class="n">Rn</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#Normal resistance which should be near the superconducting band gap. Due to heating we can measure the normal resistance slightly below the superconduting band gap.</span>
+    <span class="n">Iret_Ic_ratio</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#This is an approximation of Beta which is the damping of the circuit. Ideally [underdamped] 0.9 &lt; Beta &gt; 1.0 [overdamped]. If the circuit is overdamped then it will not work at higher frequencies (~100GHz)</span>
+    <span class="n">Ic_Rn_product</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Rn_Area_product</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Inverse_sqrtRn</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">sqrtIc</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_roomTemp</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span> <span class="c1">#room temperature R</span>
+    <span class="n">Jc_nom</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DECIMAL</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span> <span class="c1">#The critical current density Jc = Ic/Area of junction</span>
+
+    <span class="c1">#Addtional squid related measurements</span>
+    <span class="n">metal_layers</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">JJ_radius_nom1</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DECIMAL</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">JJ_radius_nom2</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DECIMAL</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">Iflux_period</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Ic_min_pos</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Ic_min_neg</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Delta_Ic_min</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Squid_Measurement(measurement_id=&#39;</span><span class="si">%s</span><span class="s2">&#39;,device_name=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Resistor_Measurement"><a class="viewcode-back" href="../code.html#database_v4.Resistor_Measurement">[docs]</a><span class="k">class</span> <span class="nc">Resistor_Measurement</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="s1">&#39;Resistor Measurement&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;resistor_measurement&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#date measurement was taken</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#time measurement was taken</span>
+    <span class="n">chip_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;chip.id&#39;</span><span class="p">))</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">))</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">num_Rs</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+
+    <span class="n">data_directory</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span> <span class="c1">#directory with data</span>
+
+    <span class="c1">#Default resistor_measurements</span>
+    <span class="n">R_4k_2000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_4k_1000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_4k_500uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="n">R_RT_2000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_RT_1000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_RT_500uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="n">Ravg_4k_2000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Ravg_4k_1000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Ravg_4k_500uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="n">sq_correction</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Rsqs_4k_2000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Rsqs_4k_1000uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">Rsqs_4k_500uA</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Resistor_Measurement(measurement_id=&#39;</span><span class="si">%s</span><span class="s2">&#39;,device_name=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_name</span><span class="p">)</span>\</div>
+
+<div class="viewcode-block" id="Via_Measurement"><a class="viewcode-back" href="../code.html#database_v4.Via_Measurement">[docs]</a><span class="k">class</span> <span class="nc">Via_Measurement</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="s1">&#39;Via Measurement&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;via_measurement&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#date measurement was taken</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span> <span class="c1">#time measurement was taken</span>
+    <span class="n">chip_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;chip.id&#39;</span><span class="p">))</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">design_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;design.id&#39;</span><span class="p">))</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">device_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+
+    <span class="c1">#JJ_radius_nom = Column(DECIMAL(13,3))</span>
+    <span class="n">data_directory</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span> <span class="c1">#directory with data</span>
+
+    <span class="c1">#Default via_measurements</span>
+    <span class="n">R_4k</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">R_RT</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Via_Measurement(measurement_id=&#39;</span><span class="si">%s</span><span class="s2">&#39;,device_name=&#39;</span><span class="si">%s</span><span class="s2">&#39;)&gt;&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_name</span><span class="p">)</span></div>
+
+<span class="c1">#Back relationships</span>
+<span class="n">Wafer</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;wafer&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">wafer</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Wafer&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+
+<span class="n">Design</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Design&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+
+<span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;jj_measurements&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">jj_measurements</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;JJ_Measurement&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+
+<span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">designs</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Design&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;jj_measurements&quot;</span><span class="p">)</span>
+<span class="n">Design</span><span class="o">.</span><span class="n">jj_measurements</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;JJ_Measurement&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">JJ_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;designs&quot;</span><span class="p">)</span>
+
+<span class="n">Squid_Measurement</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Squid_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;squid_measurements&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">squid_measurements</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Squid_Measurement&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Squid_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+
+<span class="n">Resistor_Measurement</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Resistor_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;resistor_measurements&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">resistor_measurements</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Resistor_Measurement&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Resistor_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+
+<span class="n">Via_Measurement</span><span class="o">.</span><span class="n">chips</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Chip&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Via_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;via_measurements&quot;</span><span class="p">)</span>
+<span class="n">Chip</span><span class="o">.</span><span class="n">via_measurements</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s2">&quot;Via_Measurement&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">Via_Measurement</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">back_populates</span><span class="o">=</span><span class="s2">&quot;chips&quot;</span><span class="p">)</span>
+<span class="c1">#---------------------</span>
+<span class="c1">##END BASE CLASSES</span>
+
+<span class="c1">#Lets create our Table which is part of MetaData and pass it our &#39;engine&#39; to connect to the database</span>
+<span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+<span class="c1">#Lets start chatting with the database via a session</span>
+<span class="n">Session</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">show_all_wafers</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All Wafers&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">w</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! No wafers found.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_all_chips</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All Chips&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! No chips found.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="s1">&#39;finds the chip by id or name&#39;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Found chip </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find chip: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Found chip </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find chip: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Must pass in wafer name as string or id as int&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">find_device</span><span class="p">(</span><span class="n">device</span><span class="p">,</span><span class="n">optional_designid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">output</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="s1">&#39;finds the device by id or name&#39;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Device</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Found device </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">d</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find device: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">optional_designid</span><span class="p">):</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Device</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">design_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">optional_designid</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">dev</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Found device </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">d</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find device: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Must pass in wafer name as string or id as int&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_all_designs</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All Designs&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! No designs found.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_all_devices</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Device</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All Devices&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! No devices found.&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_chips_from_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">wafer</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">wafer</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span><span class="o">.</span><span class="n">chips</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Chips associated with wafer </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">wafer</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find wafer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">wafer</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">wafer</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">wafer</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">chips</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Chips associated with wafer </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">c</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find wafer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">wafer</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Must pass in wafer name as string or id as int&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_devices_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">device_id</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Chip </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> uses design </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> and has the following device associations &quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">design</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">devices</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find wafer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Multiple chips with same name. Please use the &#39;id&#39; from the list below&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">c</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">())</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">device_id</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Chip </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> uses design </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> and has the following device associations &quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">design</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">devices</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find chip: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Must pass in chip name as string or id as int&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">show_measurements_from_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">m</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+<span class="c1"># returns the actual measurement, to be handled in the return</span>
+<span class="k">def</span> <span class="nf">get_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+         <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+         <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+         <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+         <span class="k">return</span> <span class="n">m</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<span class="c1"># inted for use with plotting all</span>
+<span class="k">def</span> <span class="nf">show_measurements_from_device</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">Rn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">Ic_pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">Ic_pos</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">Rn</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">avg_ic</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">avg_rn</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)):</span>
+            <span class="n">avg_ic</span> <span class="o">=</span> <span class="n">avg_ic</span> <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Ic_pos</span>
+            <span class="n">avg_rn</span> <span class="o">=</span> <span class="n">avg_rn</span> <span class="o">+</span> <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Rn</span>
+        <span class="n">avg_ic</span> <span class="o">=</span> <span class="n">avg_ic</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">avg_rn</span> <span class="o">=</span> <span class="n">avg_rn</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error! Too many results found. But I will find an average for you;)&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">avg_ic</span><span class="p">,</span> <span class="n">avg_rn</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error! No measurement found. I will add a 0&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">show_JJ_measurements_from_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="p">,</span> <span class="n">design</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">jj_measurements</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chips_for_design</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">find_wafer</span><span class="p">(</span><span class="n">wafer</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">chips</span> <span class="o">=</span> <span class="n">show_chips_from_wafer</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">design</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span> <span class="c1">#returns all the measurement associated with the wafer</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chips</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+            <span class="n">jj_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+            <span class="n">chips_for_design</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span> <span class="c1">#Searching for chips from wafer for a particular design name</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chips</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+            <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span> <span class="c1">#grabs the design name for the chip</span>
+            <span class="k">if</span> <span class="n">design_name</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">design</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1">#Append only chips with the proper design name</span>
+                <span class="n">jj_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+                <span class="n">chips_for_design</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">jj_measurements</span><span class="p">,</span> <span class="n">chips_for_design</span>
+
+<span class="k">def</span> <span class="nf">get_data_directory</span><span class="p">(</span><span class="n">chip</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">==</span><span class="n">Chip</span><span class="p">):</span>
+        <span class="c1">#doesn&#39;t work</span>
+        <span class="n">chip_name</span> <span class="o">=</span> <span class="n">chip</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">chip_name</span> <span class="o">=</span> <span class="n">chip</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip_name</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">data_directory</span><span class="p">]</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chip_name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">ms_toreturn</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">ms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">data_directory</span> <span class="ow">in</span> <span class="n">ms_toreturn</span><span class="p">:</span>
+                <span class="n">ms_toreturn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">data_directory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ms_toreturn</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">create_chip</span><span class="p">():</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Chip name?  &quot;</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">wafer_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Wafer name?  &#39;</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Design name?  &#39;</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Creating... </span><span class="se">\n</span><span class="s1">Chip &quot;</span><span class="si">%s</span><span class="s1">&quot; </span><span class="se">\n</span><span class="s1">Wafer &quot;</span><span class="si">%s</span><span class="s1">&quot; </span><span class="se">\n</span><span class="s1">Design &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">chip_name</span><span class="p">,</span> <span class="n">wafer_name</span><span class="p">,</span> <span class="n">design_name</span><span class="p">))</span>
+
+<div class="viewcode-block" id="device_def"><a class="viewcode-back" href="../code.html#database_v4.device_def">[docs]</a><span class="k">def</span> <span class="nf">device_def</span><span class="p">(</span><span class="n">chip_id</span><span class="p">):</span>
+    <span class="s1">&#39;pass in chip name returns the device definition as list of tuples&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Chip</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Chip</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="n">chip_id</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">device_id</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Found chip: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">!ERROR! Did not find chip_id:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">chip_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="calc_Jc"><a class="viewcode-back" href="../code.html#database_v4.calc_Jc">[docs]</a><span class="k">def</span> <span class="nf">calc_Jc</span><span class="p">(</span><span class="n">Ic</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="s1">&#39;returns value of critical current density Jc based on Ic and JJ radius&#39;</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">JJ_radius</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">Ic</span><span class="o">/</span><span class="n">A</span></div>
+
+<div class="viewcode-block" id="predict_Ic"><a class="viewcode-back" href="../code.html#database_v4.predict_Ic">[docs]</a><span class="k">def</span> <span class="nf">predict_Ic</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="s1">&#39;returns value of predicted Ic&#39;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">JJ_radius</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">Jc</span><span class="o">*</span><span class="n">A</span></div>
+
+<div class="viewcode-block" id="sweep_def"><a class="viewcode-back" href="../code.html#database_v4.sweep_def">[docs]</a><span class="k">def</span> <span class="nf">sweep_def</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="s1">&#39;creates sweep range for one device&#39;</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">predict_Ic</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted Ic:</span><span class="si">%e</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">Ic</span><span class="p">)</span>
+    <span class="n">I_min</span> <span class="o">=</span> <span class="o">-</span><span class="n">Ic</span><span class="o">*</span><span class="n">Ic_range_scale</span>
+    <span class="n">I_max</span> <span class="o">=</span> <span class="o">-</span><span class="n">I_min</span>
+    <span class="k">return</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span></div>
+
+<div class="viewcode-block" id="sweep_def_SQUID_smaller_range"><a class="viewcode-back" href="../code.html#database_v4.sweep_def_SQUID_smaller_range">[docs]</a><span class="k">def</span> <span class="nf">sweep_def_SQUID_smaller_range</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="s1">&#39;creates sweep range for one device&#39;</span>
+    <span class="n">Ic</span> <span class="o">=</span>  <span class="n">predict_Ic</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">)</span>
+    <span class="n">Ic</span> <span class="o">*=</span><span class="mi">2</span>
+    <span class="c1">#***changed for SQUID measurements***</span>
+    <span class="c1"># mult. by 20 for first 7, then by 3 for rest of devices</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted Ic:</span><span class="si">%e</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">Ic</span><span class="p">)</span>
+    <span class="n">I_min</span> <span class="o">=</span> <span class="o">-</span><span class="n">Ic</span><span class="o">*</span><span class="n">Ic_range_scale</span>
+    <span class="n">I_max</span> <span class="o">=</span> <span class="o">-</span><span class="n">I_min</span>
+    <span class="k">return</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span></div>
+
+<div class="viewcode-block" id="sweep_def_SQUID_bigger_range"><a class="viewcode-back" href="../code.html#database_v4.sweep_def_SQUID_bigger_range">[docs]</a><span class="k">def</span> <span class="nf">sweep_def_SQUID_bigger_range</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="s1">&#39;creates sweep range for one device&#39;</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">predict_Ic</span><span class="p">(</span><span class="n">Jc</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">)</span>
+
+    <span class="c1">#***changed for SQUID measurements***</span>
+    <span class="c1"># mult. by 20 for first 7, then by 3 for rest of devices</span>
+    <span class="n">Ic</span> <span class="o">*=</span> <span class="mi">15</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted Ic:</span><span class="si">%e</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">Ic</span><span class="p">)</span>
+    <span class="n">I_min</span> <span class="o">=</span> <span class="o">-</span><span class="n">Ic</span><span class="o">*</span><span class="n">Ic_range_scale</span>
+    <span class="n">I_max</span> <span class="o">=</span> <span class="o">-</span><span class="n">I_min</span>
+    <span class="k">return</span> <span class="n">I_min</span><span class="p">,</span> <span class="n">I_max</span></div>
+
+<div class="viewcode-block" id="calc_JJ_measurements"><a class="viewcode-back" href="../code.html#database_v4.calc_JJ_measurements">[docs]</a><span class="k">def</span> <span class="nf">calc_JJ_measurements</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This will calculate the JJ measurements based on the values of Ic, Iret, Rn, and Imax</span>
+<span class="sd">    Returns a list with all the values Ic_pos, Ic_neg, Iret_pos, Iret_neg, Imax, Rn, Iret_Ic_ratio, Ic_Rn_product, Rn_Area_product, Inverse_sqrtRn, sqrtIc, Jc_nom</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">Ic_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span> <span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span> <span class="n">Iret_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Iret</span> <span class="o">=</span> <span class="n">Iret_pos</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">Ic_pos</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">JJ_radius</span><span class="o">**</span><span class="mi">2</span> <span class="c1">#area of JJ</span>
+    <span class="n">Iret_Ic_ratio</span> <span class="o">=</span> <span class="n">Iret</span><span class="o">/</span><span class="n">Ic</span><span class="p">;</span> <span class="n">Ic_Rn_product</span> <span class="o">=</span> <span class="n">Ic</span><span class="o">*</span><span class="n">Rn</span><span class="p">;</span> <span class="n">Rn_Area_product</span> <span class="o">=</span> <span class="n">Rn</span><span class="o">*</span><span class="n">A</span><span class="p">;</span> <span class="n">Inverse_sqrtRn</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Rn</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span> <span class="n">sqrtIc</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Ic</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span> <span class="n">Jc_nom</span> <span class="o">=</span> <span class="n">Ic</span><span class="o">/</span><span class="n">A</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">Ic_pos</span><span class="p">,</span> <span class="n">Ic_neg</span><span class="p">,</span> <span class="n">Iret_pos</span><span class="p">,</span> <span class="n">Iret_neg</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Iret_Ic_ratio</span><span class="p">,</span> <span class="n">Ic_Rn_product</span><span class="p">,</span> <span class="n">Rn_Area_product</span><span class="p">,</span> <span class="n">Inverse_sqrtRn</span><span class="p">,</span> <span class="n">sqrtIc</span><span class="p">,</span> <span class="n">Jc_nom</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+<span class="c1">#TODO list: add design to device, calculate the values to input to database with function above, move chip.id and design.id to 2 &amp; 3 column</span>
+
+<div class="viewcode-block" id="save_JJ_Measurements"><a class="viewcode-back" href="../code.html#database_v4.save_JJ_Measurements">[docs]</a><span class="k">def</span> <span class="nf">save_JJ_Measurements</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Ic_list</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+    <span class="n">JJ_radius</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span> <span class="c1">#Need to for the calculations below</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">calc_JJ_measurements</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">)</span> <span class="c1">#calculates relevant values to save to the database</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">design_name</span><span class="p">)</span>
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">jj_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">num_JJs</span><span class="p">,</span>\
+                                            <span class="n">JJ_radius_nom</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">,</span> <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">Ic_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>\
+                                            <span class="n">Iret_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="n">Imax</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span> <span class="n">Rn</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span> <span class="n">Iret_Ic_ratio</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span> <span class="n">Ic_Rn_product</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span> <span class="n">Rn_Area_product</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span> <span class="n">Inverse_sqrtRn</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span> <span class="n">sqrtIc</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">10</span><span class="p">]),</span>\
+                                            <span class="n">Jc_nom</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">11</span><span class="p">])))</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_Squid_Measurements"><a class="viewcode-back" href="../code.html#database_v4.save_Squid_Measurements">[docs]</a><span class="k">def</span> <span class="nf">save_Squid_Measurements</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Ic_list</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+    <span class="n">JJ_radius</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span> <span class="c1">#Need to for the calculations below</span>
+
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">design_name</span><span class="p">)</span>
+
+    <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">Ic_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span> <span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span> <span class="n">Iret_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">squid_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Squid_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">num_JJs</span><span class="p">,</span>\
+                                            <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">Ic_pos</span> <span class="o">=</span> <span class="n">Ic_pos</span><span class="p">,</span> <span class="n">Ic_neg</span> <span class="o">=</span> <span class="n">Ic_neg</span><span class="p">,</span>\
+                                            <span class="n">Iret_neg</span> <span class="o">=</span> <span class="n">Iret_neg</span><span class="p">,</span> <span class="n">Iret_pos</span> <span class="o">=</span> <span class="n">Iret_pos</span><span class="p">))</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_Resistance_Measurements_warm"><a class="viewcode-back" href="../code.html#database_v4.save_Resistance_Measurements_warm">[docs]</a><span class="k">def</span> <span class="nf">save_Resistance_Measurements_warm</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Resistance_list</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">design_name</span><span class="p">)</span>
+
+    <span class="n">R_RT_500uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">R_RT_1000uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">R_RT_2000uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">resistor_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Resistor_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>\
+                                            <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">R_RT_2000uA</span> <span class="o">=</span> <span class="n">R_RT_2000uA</span><span class="p">,</span> <span class="n">R_RT_1000uA</span> <span class="o">=</span> <span class="n">R_RT_1000uA</span><span class="p">,</span>\
+                                            <span class="n">R_RT_500uA</span> <span class="o">=</span> <span class="n">R_RT_500uA</span><span class="p">))</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_Resistance_Measurements_cold"><a class="viewcode-back" href="../code.html#database_v4.save_Resistance_Measurements_cold">[docs]</a><span class="k">def</span> <span class="nf">save_Resistance_Measurements_cold</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Resistance_list</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">design_name</span><span class="p">)</span>
+
+    <span class="n">measurement</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Resistor_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+
+    <span class="c1"># get relevant info</span>
+    <span class="n">chip</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">chip_name</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">device_name</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">date</span>
+
+    <span class="n">R_4k_500uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">R_4k_1000uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">R_4k_2000uA</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Resistance_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">measurement</span><span class="o">.</span><span class="n">R_4k_500uA</span> <span class="o">=</span> <span class="n">R_4k_500uA</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">R_4k_1000uA</span> <span class="o">=</span> <span class="n">R_4k_1000uA</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">R_4k_2000uA</span> <span class="o">=</span> <span class="n">R_4k_2000uA</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_Via_Measurements_warm"><a class="viewcode-back" href="../code.html#database_v4.save_Via_Measurements_warm">[docs]</a><span class="k">def</span> <span class="nf">save_Via_Measurements_warm</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">resistance</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">R_RT</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resistance</span><span class="p">)</span>
+
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">via_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Via_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>\
+                                            <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">R_RT</span> <span class="o">=</span> <span class="n">R_RT</span><span class="p">))</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_Via_Measurements_cold"><a class="viewcode-back" href="../code.html#database_v4.save_Via_Measurements_cold">[docs]</a><span class="k">def</span> <span class="nf">save_Via_Measurements_cold</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">resistance</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="n">measurement</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Via_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+
+    <span class="c1"># get relevant info</span>
+    <span class="n">chip</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">chip_name</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">device_name</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">date</span>
+
+    <span class="n">R_4k</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resistance</span><span class="p">)</span>
+
+    <span class="n">measurement</span><span class="o">.</span><span class="n">R_4k</span> <span class="o">=</span> <span class="n">R_4k</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<span class="c1">#==============================================</span>
+<span class="c1"># functions for saving during the sweeps</span>
+
+<div class="viewcode-block" id="calc_JJ_measurements_after"><a class="viewcode-back" href="../code.html#database_v4.calc_JJ_measurements_after">[docs]</a><span class="k">def</span> <span class="nf">calc_JJ_measurements_after</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This will calculate the JJ measurements based Ics, Rn, Imax, and Radius</span>
+<span class="sd">    Returns a list with all the values Ic_pos, Ic_neg, Iret_pos, Iret_neg, Imax, Rn, Iret_Ic_ratio, Ic_Rn_product, Rn_Area_product, Inverse_sqrtRn, sqrtIc, Jc_nom</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+    <span class="n">Iret</span> <span class="o">=</span> <span class="n">Iret_pos</span>
+    <span class="n">Ic</span> <span class="o">=</span> <span class="n">Ic_pos</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">JJ_radius</span><span class="o">**</span><span class="mi">2</span> <span class="c1">#area of JJ</span>
+    <span class="n">Ic_Rn_product</span> <span class="o">=</span> <span class="n">Ic</span><span class="o">*</span><span class="n">Rn</span><span class="p">;</span> <span class="n">Rn_Area_product</span> <span class="o">=</span> <span class="n">Rn</span><span class="o">*</span><span class="n">A</span><span class="p">;</span> <span class="n">Jc_nom</span> <span class="o">=</span> <span class="n">Ic</span><span class="o">/</span><span class="n">A</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Iret_Ic_ratio</span> <span class="o">=</span> <span class="n">Iret</span><span class="o">/</span><span class="n">Ic</span>
+        <span class="n">Inverse_sqrtRn</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Rn</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span> <span class="n">sqrtIc</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Ic</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">Iret_Ic_ratio</span> <span class="o">=</span> <span class="mf">1e-09</span>
+        <span class="n">Inverse_sqrtRn</span> <span class="o">=</span> <span class="mf">1e-09</span><span class="p">;</span> <span class="n">sqrtIc</span> <span class="o">=</span> <span class="mf">1e-09</span><span class="p">;</span>
+            
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">Iret_Ic_ratio</span><span class="p">,</span> <span class="n">Ic_Rn_product</span><span class="p">,</span> <span class="n">Rn_Area_product</span><span class="p">,</span> <span class="n">Inverse_sqrtRn</span><span class="p">,</span> <span class="n">sqrtIc</span><span class="p">,</span> <span class="n">Jc_nom</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="save_JJ_Measurements_Ic"><a class="viewcode-back" href="../code.html#database_v4.save_JJ_Measurements_Ic">[docs]</a><span class="k">def</span> <span class="nf">save_JJ_Measurements_Ic</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Ic_list</span><span class="p">,</span> <span class="n">data_directory</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+
+<span class="sd">    returns measurment id, for measure Rn to use and pass into the calc_JJ_measuremnts</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">Ic_list</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">design_name</span><span class="p">)</span>
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">this_JJ_Measurement</span> <span class="o">=</span> <span class="n">JJ_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">num_JJs</span><span class="p">,</span>\
+                                            <span class="n">JJ_radius_nom</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">,</span> <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Ic_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span><span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>\
+                                            <span class="n">Iret_neg</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">this_JJ_Measurement</span> <span class="o">=</span> <span class="n">JJ_Measurement</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">current_time</span><span class="p">,</span> <span class="n">chip_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">design_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">,</span> <span class="n">design_name</span> <span class="o">=</span> <span class="n">design_name</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num_JJs</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">num_JJs</span><span class="p">,</span>\
+                                            <span class="n">JJ_radius_nom</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span><span class="p">,</span> <span class="n">data_directory</span> <span class="o">=</span> <span class="n">data_directory</span><span class="p">,</span>\
+                                            <span class="n">Ic_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Iret_pos</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">jj_measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_JJ_Measurement</span><span class="p">)</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">this_JJ_Measurement</span><span class="o">.</span><span class="n">id</span></div>
+
+<div class="viewcode-block" id="save_JJ_Measurements_Rn"><a class="viewcode-back" href="../code.html#database_v4.save_JJ_Measurements_Rn">[docs]</a><span class="k">def</span> <span class="nf">save_JJ_Measurements_Rn</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">measurement_id</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves 4 Ic values from Ic_list to the measurements of the particular chip</span>
+<span class="sd">    Extracts the device details from the passed in device object and assigns</span>
+<span class="sd">    the measurement to the chip from the passed in chip id or name</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1">#need this to force the database to update</span>
+
+    <span class="n">measurement</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">measurement_id</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+
+
+    <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#get the date</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span> <span class="c1">#get the time</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+
+    <span class="n">Ic_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">Ic_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">Ic_pos</span><span class="p">)</span>
+    <span class="n">Ic_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">Iret_pos</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Device</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">design_id</span>
+            <span class="n">devices</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Device</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">design_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="n">design</span><span class="p">:</span>
+                    <span class="n">device</span> <span class="o">=</span> <span class="n">dev</span>
+
+    <span class="n">JJ_radius</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">JJ_radius_nom</span> <span class="c1">#Need to for the calculations below</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">calc_JJ_measurements_after</span><span class="p">(</span><span class="n">Ic_list</span><span class="p">,</span><span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">,</span> <span class="n">JJ_radius</span><span class="p">)</span> <span class="c1">#calculates relevant values to save to the database</span>
+    <span class="n">design_name</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+
+    <span class="c1">#Writes all the data into the database returned from the line above</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Imax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Imax</span><span class="p">)</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Rn</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Rn</span><span class="p">)</span>
+
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Iret_Ic_ratio</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Ic_Rn_product</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Rn_Area_product</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Inverse_sqrtRn</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">sqrtIc</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="n">measurement</span><span class="o">.</span><span class="n">Jc_nom</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data successfully saved to database&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="chip_Jc"><a class="viewcode-back" href="../code.html#database_v4.chip_Jc">[docs]</a><span class="k">def</span> <span class="nf">chip_Jc</span><span class="p">(</span><span class="n">chip</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Queries the database for wafer.Jc_approx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span> <span class="c1">#get the chip from database</span>
+    <span class="n">Jc</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Wafer</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">wafer_id</span><span class="p">)</span><span class="o">.</span><span class="n">Jc_approx</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">Jc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Jc</span></div>
+
+<span class="k">def</span> <span class="nf">copy_design</span><span class="p">(</span><span class="n">design_id</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">og_design</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Design</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">design_id</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+        <span class="n">og_devices</span> <span class="o">=</span> <span class="n">og_design</span><span class="o">.</span><span class="n">device_id</span>
+
+        <span class="n">design</span> <span class="o">=</span> <span class="n">Design</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">og_design</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; COPY&#39;</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">og_devices</span><span class="p">)):</span>
+            <span class="n">og_dev</span> <span class="o">=</span> <span class="n">og_devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">card</span>
+            <span class="n">card1</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">card1</span>
+            <span class="n">card2</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">card2</span>
+            <span class="n">channel1</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">channel1</span>
+            <span class="n">channel2</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">channel2</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; COPY&#39;</span>
+            <span class="n">pads</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">pads</span>
+            <span class="n">device_type</span> <span class="o">=</span> <span class="n">og_dev</span><span class="o">.</span><span class="n">device_type</span>
+
+            <span class="n">dev</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">card</span><span class="o">=</span><span class="n">card</span><span class="p">,</span> <span class="n">card1</span><span class="o">=</span><span class="n">card1</span><span class="p">,</span> <span class="n">card2</span><span class="o">=</span><span class="n">card2</span><span class="p">,</span> <span class="n">channel1</span><span class="o">=</span><span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="o">=</span><span class="n">channel2</span><span class="p">,</span> <span class="n">pads</span><span class="o">=</span><span class="n">pads</span><span class="p">,</span> <span class="n">device_type</span><span class="o">=</span><span class="n">device_type</span><span class="p">)</span>
+
+            <span class="n">design</span><span class="o">.</span><span class="n">device_id</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">rv</span>
+
+<span class="k">def</span> <span class="nf">get_session</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">session</span>
+
+<span class="k">def</span> <span class="nf">end_session</span><span class="p">():</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

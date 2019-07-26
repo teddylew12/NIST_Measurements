@@ -1,0 +1,430 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Overwrite_Rn &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Overwrite_Rn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jul 17 14:23:53 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">Live_Plot_Functions</span> <span class="k">as</span> <span class="nn">lpf</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d3</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy</span> <span class="k">as</span> <span class="nn">sa</span>
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">exporters</span>
+
+<div class="viewcode-block" id="initialization"><a class="viewcode-back" href="../code.html#Overwrite_Rn.initialization">[docs]</a><span class="k">def</span> <span class="nf">initialization</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Initialize plotting elements</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_windows</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_plots</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_curves</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">curves</span></div>
+
+<span class="c1">#====================</span>
+<span class="c1"># Funtion that allows user to select new Rn, I_max values</span>
+<span class="c1">#====================</span>
+
+<div class="viewcode-block" id="open_data"><a class="viewcode-back" href="../code.html#Overwrite_Rn.open_data">[docs]</a><span class="k">def</span> <span class="nf">open_data</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    User selects values for rn and I max using the mouse and the database is </span>
+<span class="sd">    updated</span>
+<span class="sd">    </span>
+<span class="sd">    :param filename: full filename of _Rn_raw data</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># globals needed to communicate with mouse move fcn</span>
+    <span class="k">global</span> <span class="n">count</span><span class="p">,</span> <span class="n">slope_x</span><span class="p">,</span> <span class="n">slope_y</span><span class="p">,</span> <span class="n">steps</span>
+    <span class="k">global</span> <span class="n">vLines</span><span class="p">,</span> <span class="n">hLines</span><span class="p">,</span> <span class="n">slope_plots</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">vbs</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">I_max_plots</span>
+    <span class="k">global</span> <span class="n">I_max_x</span><span class="p">,</span> <span class="n">I_max_y</span>
+    <span class="k">global</span> <span class="n">num_JJ</span><span class="p">,</span> <span class="n">chip_info</span><span class="p">,</span> <span class="n">chip_name</span><span class="p">,</span> <span class="n">dev_name</span><span class="p">,</span> <span class="n">dev_size</span>
+    <span class="k">global</span> <span class="n">filename_to_save</span><span class="p">,</span> <span class="n">web_info</span><span class="p">,</span> <span class="n">web_link</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+    
+    <span class="n">web_link</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/Forms/AllItems.aspx?viewpath=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">Forms</span><span class="si">%2F</span><span class="s2">AllItems</span><span class="si">%2E</span><span class="s2">aspx&amp;id=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">SFQ_circuits</span><span class="si">%2F</span><span class="s2">Measurements</span><span class="si">%2F</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">filename_to_save</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span>
+    
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    
+    <span class="c1"># same set up as live plot, create all aspects</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">initialization</span><span class="p">()</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_data</span><span class="p">(</span><span class="n">curves</span><span class="p">)</span>
+    <span class="n">vbs</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_vb</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span> <span class="c1"># this is new, need to use viewbox to convert coordinates</span>
+    
+    <span class="c1"># set up window correctly</span>
+    <span class="n">windows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># move to other desktop, spyder had been blocking before</span>
+    
+    <span class="n">windows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setWindowState</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowActive</span><span class="p">)</span>
+    <span class="n">windows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    
+    <span class="c1"># this will activate the window (yellow flashing on icon)</span>
+    <span class="n">windows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+
+    <span class="c1"># find the number of junctions based on the filename</span>
+    <span class="n">dev_is_sj</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;SJ&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="c1"># is it a single junction?</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_is_sj</span><span class="p">)</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># yes</span>
+        <span class="n">num_JJ</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># no</span>
+        <span class="n">num_JJ</span> <span class="o">=</span> <span class="mi">400</span>
+    
+    <span class="c1"># get the chip name</span>
+    <span class="n">filename_split_up</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="c1">#first, split by components</span>
+    <span class="n">web_info</span> <span class="o">=</span> <span class="n">filename_split_up</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">filename_split_up</span> <span class="o">=</span> <span class="n">filename_split_up</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># get the last section</span>
+    <span class="n">chip_info</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_Rn_raw&#39;</span><span class="p">,</span> <span class="n">filename_split_up</span><span class="p">)</span> <span class="c1"># split the descrtiption</span>
+    <span class="n">chip_info</span> <span class="o">=</span> <span class="n">chip_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">chip_info_split</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">chip_info</span><span class="p">)</span>
+    <span class="n">chip_name</span> <span class="o">=</span> <span class="n">chip_info_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dev_name</span> <span class="o">=</span> <span class="n">chip_info_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dev_size</span> <span class="o">=</span> <span class="n">chip_info_split</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;name: &quot;</span> <span class="o">+</span> <span class="n">chip_name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dev: &quot;</span> <span class="o">+</span> <span class="n">dev_name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;size: &quot;</span> <span class="o">+</span> <span class="n">dev_size</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;num JJ: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">num_JJ</span><span class="p">)</span>
+    
+    
+    <span class="c1"># get the data </span>
+    <span class="c1"># input file name must use &#39;/&#39;, not &#39;\&#39;</span>
+    
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="c1"># numPy likes double backslashes</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1"># raw</span>
+    <span class="n">I_np</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># in format of np.array</span>
+    <span class="n">V_np</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    
+    <span class="c1"># convert to python array and plot</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">I_np</span><span class="p">)):</span>
+        <span class="n">I</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I_np</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">V</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V_np</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">curves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">symbolSize</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">symbolBrush</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="c1"># set global vars, to send to mouse click function</span>
+    <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span>
+    <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">V</span>
+    
+    <span class="c1">#detect the spacing</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># create the cross hairs</span>
+    <span class="n">vLines</span><span class="p">,</span> <span class="n">hLines</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_lines</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+
+    <span class="c1"># initialize count and placeholders</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">slope_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">slope_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">I_max_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">I_max_y</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># connect the mouse functions</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">plots</span><span class="p">)):</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">onClick</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">plots</span><span class="p">)):</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">MouseMoved</span><span class="p">)</span>
+
+    <span class="c1"># create the blank data to be added to</span>
+    <span class="n">slope_plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_slope_plots</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    <span class="n">I_max_plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_slope_plots</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    
+    <span class="c1"># use title as instructions</span>
+    <span class="n">plots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;Select two points to find the Rn&quot;</span><span class="p">)</span></div>
+
+<span class="c1">#====================</span>
+<span class="c1"># function for movement of mouse, called anytime mouse is moved</span>
+<span class="c1">#===================</span>
+<div class="viewcode-block" id="MouseMoved"><a class="viewcode-back" href="../code.html#Overwrite_Rn.MouseMoved">[docs]</a><span class="k">def</span> <span class="nf">MouseMoved</span><span class="p">(</span><span class="n">evt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Function to track the mouse movement, redraws crosshairs</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">vbs</span><span class="p">,</span> <span class="n">curves</span>
+    <span class="k">global</span> <span class="n">vLines</span><span class="p">,</span> <span class="n">hLines</span>
+    <span class="c1"># get position of mouse</span>
+    <span class="n">pos</span><span class="o">=</span><span class="n">evt</span>
+
+    <span class="c1"># find which window is active</span>
+    <span class="n">active_window</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">curves</span><span class="p">)):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isActive</span><span class="p">()):</span>
+            <span class="n">active_window</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+
+    <span class="c1"># convert to the scene in widget</span>
+    <span class="n">mousePoint</span> <span class="o">=</span> <span class="n">vbs</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+
+
+    <span class="c1"># move the lines </span>
+    <span class="n">vLines</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
+    <span class="n">hLines</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span></div>
+
+<span class="c1">#==================</span>
+<span class="c1"># function for clicking the mouse, called whenevr the mouse is clicked</span>
+<span class="c1">#==================</span>
+<div class="viewcode-block" id="onClick"><a class="viewcode-back" href="../code.html#Overwrite_Rn.onClick">[docs]</a><span class="k">def</span> <span class="nf">onClick</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Response to a mouse click. </span>
+<span class="sd">    </span>
+<span class="sd">    Draws red point on first and second click and slope between them for RN</span>
+<span class="sd">   </span>
+<span class="sd">    Third click is a green point for the Imax  </span>
+<span class="sd">   </span>
+<span class="sd">    After the third click, the new data is written into the database if the measurement is unique. </span>
+<span class="sd">    </span>
+<span class="sd">    Otherwise, a function to manually select the measurement is printed</span>
+<span class="sd">   </span>
+<span class="sd">    Fourth Click clears and resets</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">count</span><span class="p">,</span> <span class="n">slope_x</span><span class="p">,</span> <span class="n">slope_y</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">slope_labels</span>
+    <span class="k">global</span> <span class="n">curves</span><span class="p">,</span> <span class="n">vbs</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">slope_plots</span><span class="p">,</span> <span class="n">plots</span>
+    <span class="k">global</span> <span class="n">I_max_plots</span><span class="p">,</span> <span class="n">I_max_x</span><span class="p">,</span> <span class="n">I_max_y</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">label1</span><span class="p">,</span> <span class="n">label2</span>
+    <span class="k">global</span> <span class="n">num_JJ</span><span class="p">,</span> <span class="n">chip_info</span><span class="p">,</span> <span class="n">chip_name</span><span class="p">,</span> <span class="n">dev_name</span><span class="p">,</span> <span class="n">dev_size</span><span class="p">,</span> <span class="n">Rn</span>
+    <span class="k">global</span> <span class="n">filename_to_save</span><span class="p">,</span> <span class="n">web_info</span><span class="p">,</span> <span class="n">web_link</span>
+
+    <span class="c1"># finds which window is active</span>
+    <span class="n">active_window</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">curves</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isActive</span><span class="p">()):</span>
+            <span class="n">active_window</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+
+    <span class="c1"># get position and convert to scene in widget</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+    <span class="n">mousePoint</span> <span class="o">=</span> <span class="n">vbs</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    
+    <span class="n">index</span> <span class="o">=</span> <span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+
+    <span class="c1"># index in the data correspoding to x of click</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">index</span> <span class="o">/</span><span class="n">steps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">10</span>
+    <span class="c1"># Now, do stuff with the clicks</span>
+    <span class="k">if</span> <span class="n">index</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">index</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">]):</span> <span class="c1"># make sure it&#39;s in the range</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">count</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span> <span class="c1"># fourth click, clear all and reset</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">slope_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">slope_y</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">I_max_x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">I_max_y</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">slope_plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">I_max_plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">label1</span><span class="p">)</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span>
+            
+            
+        <span class="k">elif</span> <span class="n">count</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># first click, append to slope calc</span>
+            <span class="n">slope_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">slope_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">slope_plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">slope_x</span><span class="p">,</span> <span class="n">slope_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>   
+            
+        <span class="k">elif</span> <span class="n">count</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span> <span class="c1"># second click, append and then calc slope</span>
+            <span class="n">slope_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">slope_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="p">(</span><span class="n">slope_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">slope_y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">slope_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">slope_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">Rn</span> <span class="o">=</span> <span class="n">slope</span><span class="o">/</span><span class="n">num_JJ</span>
+            <span class="c1"># add red line top visualize</span>
+            <span class="n">slope_plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">slope_x</span><span class="p">,</span> <span class="n">slope_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span> <span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># add labels</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Slope: &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">slope</span><span class="p">)),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">5</span><span class="p">))</span>
+            <span class="n">label1</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Rn: &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">Rn</span><span class="p">)),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">label1</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label1</span><span class="p">)</span>
+            
+            <span class="c1"># set instructions</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;Select a point for I_max&quot;</span><span class="p">)</span>
+
+       
+        <span class="k">elif</span> <span class="n">count</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span> <span class="c1"># third click, append to I_max, and save all to database</span>
+            <span class="n">I_max_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">I_max_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">Imax</span> <span class="o">=</span> <span class="n">I_max_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># add green point to visualize</span>
+            <span class="n">I_max_plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">I_max_x</span><span class="p">,</span> <span class="n">I_max_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># add label</span>
+            <span class="n">label2</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;I max: &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">Imax</span><span class="p">)),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">5</span><span class="p">))</span>
+            <span class="n">label2</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">active_window</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label2</span><span class="p">)</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="n">chip_info</span><span class="p">)</span>
+            
+            <span class="c1"># Save Data Here</span>
+            <span class="c1"># Overwrite the data</span>
+            <span class="n">overwrite_Rn_Imax</span><span class="p">(</span><span class="n">chip_name</span><span class="p">,</span> <span class="n">dev_name</span><span class="p">,</span> <span class="n">Rn</span><span class="p">,</span> <span class="n">Imax</span><span class="p">)</span>
+            
+            <span class="c1"># save image</span>
+
+            <span class="c1"># if name has already been taken, i.e after first save</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">filename_to_save</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">filename_to_save</span> <span class="o">=</span> <span class="n">filename_to_save</span> <span class="o">+</span> <span class="s2">&quot;_Revised.png&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">filename_to_save</span><span class="p">)</span>
+            <span class="n">web_link</span><span class="o">=</span> <span class="n">web_link</span> <span class="o">+</span> <span class="n">web_info</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">web_link</span><span class="p">)</span>
+            <span class="n">exporter</span> <span class="o">=</span> <span class="n">exporters</span><span class="o">.</span><span class="n">ImageExporter</span><span class="p">(</span><span class="n">plots</span><span class="p">[</span><span class="n">active_window</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+            <span class="n">exporter</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">filename_to_save</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Image Saved&quot;</span><span class="p">)</span></div>
+
+<span class="c1">#=======================</span>
+<span class="c1"># function to overwrite the values in the database</span>
+<span class="c1">#=======================</span>
+<div class="viewcode-block" id="overwrite_Rn_Imax"><a class="viewcode-back" href="../code.html#Overwrite_Rn.overwrite_Rn_Imax">[docs]</a><span class="k">def</span> <span class="nf">overwrite_Rn_Imax</span><span class="p">(</span><span class="n">chipname</span><span class="p">,</span> <span class="n">devicename</span><span class="p">,</span> <span class="n">new_Rn</span><span class="p">,</span> <span class="n">new_Imax</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">     Sets the Rn and Imax in the database to the new values passed</span>
+<span class="sd">    </span>
+<span class="sd">    :param chipname: Target Chip</span>
+<span class="sd">        </span>
+<span class="sd">    :param devicename: Target Device</span>
+<span class="sd">            </span>
+<span class="sd">    :param new_Rn: New Rn to be Saved</span>
+<span class="sd">                </span>
+<span class="sd">    :param new_Imax: New Imax to be Saved</span>
+<span class="sd">   </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># connect to database</span>
+    <span class="n">imp</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="n">d3</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">d3</span><span class="o">.</span><span class="n">session</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    
+    <span class="c1"># if there is one result</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># get the existing measurement</span>
+        <span class="n">measurement</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">d3</span><span class="o">.</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chipname</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">devicename</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+    
+        <span class="c1"># get relevant info</span>
+        <span class="n">chip</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">chip_name</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">device_name</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">date</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">meas_id</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">id</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Found device </span><span class="si">%s</span><span class="s2"> on chip </span><span class="si">%s</span><span class="s2"> measured on </span><span class="si">%s</span><span class="s2"> at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="p">))</span>
+        
+        <span class="c1"># tell the user the change </span>
+        <span class="n">old_Rn</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">Rn</span>
+        <span class="n">old_Imax</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">Imax</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Old Rn: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">old_Rn</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Old Imax: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">old_Imax</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">New Rn: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">new_Rn</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">New Imax: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">new_Imax</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>     
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overwriting....&quot;</span><span class="p">)</span>
+        
+        <span class="n">d3</span><span class="o">.</span><span class="n">save_JJ_Measurements_Rn</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">new_Rn</span><span class="p">,</span> <span class="n">new_Imax</span><span class="p">,</span> <span class="n">meas_id</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># commit changes</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success&quot;</span><span class="p">)</span>
+          
+    <span class="c1"># if more than chip, occur, User input the id</span>
+    <span class="k">except</span> <span class="n">sa</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">MultipleResultsFound</span><span class="p">:</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">d3</span><span class="o">.</span><span class="n">JJ_Measurement</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">chip_name</span><span class="o">=</span><span class="n">chipname</span><span class="p">,</span> <span class="n">device_name</span><span class="o">=</span><span class="n">devicename</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Multiple results found, use the following function to manually set new data:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Copy and Paste the following, then run:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OR.manual_data_overwrite(</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s2">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">chipname</span><span class="p">,</span> <span class="n">devicename</span><span class="p">,</span> <span class="n">new_Rn</span><span class="p">,</span> <span class="n">new_Imax</span><span class="p">))</span></div>
+
+<span class="c1">#=======================</span>
+<span class="c1"># function to overwrite the database when multiple measurements are found</span>
+<span class="c1">#=======================</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

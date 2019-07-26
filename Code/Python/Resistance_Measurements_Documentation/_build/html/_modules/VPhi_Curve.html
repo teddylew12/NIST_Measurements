@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VPhi_Curve &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for VPhi_Curve</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue Jul 25 17:01:00 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">Visa_Functions</span> <span class="k">as</span> <span class="nn">vf</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">short</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">nplc</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Vrange</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+<span class="n">VDwellTime</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">Irange</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">02</span>
+<span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">2.</span>
+
+<div class="viewcode-block" id="automate_channel_VPhi_live"><a class="viewcode-back" href="../code.html#VPhi_Curve.automate_channel_VPhi_live">[docs]</a><span class="k">def</span> <span class="nf">automate_channel_VPhi_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">currents</span><span class="p">,</span> <span class="n">Ib</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Automates V-Phi curves for many devices</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">I_min_flux</span> <span class="o">=</span> <span class="n">currents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">I_max_flux</span> <span class="o">=</span> <span class="n">currents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">channel_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">channel_pairs</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">channel1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">channel2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span> <span class="o">=</span> <span class="n">sweep_flux_current_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">Ib</span><span class="p">,</span> <span class="n">I_min_flux</span><span class="p">,</span> <span class="n">I_max_flux</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span></div>
+
+<div class="viewcode-block" id="sweep_flux_current_live"><a class="viewcode-back" href="../code.html#VPhi_Curve.sweep_flux_current_live">[docs]</a><span class="k">def</span> <span class="nf">sweep_flux_current_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">,</span> <span class="n">Ib</span><span class="p">,</span> <span class="n">I_min_flux</span><span class="p">,</span> <span class="n">I_max_flux</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel1</span><span class="p">,</span> <span class="n">channel2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Sweep the flux line while keeping a constant I bias. Plots voltage live</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">Irange</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">02</span>
+    <span class="n">compliance_voltage</span> <span class="o">=</span> <span class="mf">2.</span>
+    
+    <span class="n">Voltmeter</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span>
+    <span class="n">CurrentSource_Ib</span><span class="p">,</span> <span class="n">CurrentSource_Flux</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_current_SQUID</span><span class="p">()</span>
+    <span class="n">Switch</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">get_switch</span><span class="p">()</span>
+
+<span class="c1">#    if card == 10:</span>
+<span class="c1">#        vf.intialize_switch(Switch, card)</span>
+<span class="c1">#    else:</span>
+<span class="c1">#        vf.intialize_switch_multiple_cards(Switch)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_switch</span><span class="p">(</span><span class="n">Switch</span><span class="p">)</span>
+    
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko</span><span class="p">(</span><span class="n">CurrentSource_Ib</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+    <span class="c1"># make sure this range and compliance voltage are good</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_current_yoko_GS610</span><span class="p">(</span><span class="n">CurrentSource_Flux</span><span class="p">,</span> <span class="n">Irange</span><span class="p">,</span> <span class="n">compliance_voltage</span><span class="p">)</span>
+	
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">intialize_voltage</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">nplc</span><span class="p">,</span> <span class="n">Vrange</span><span class="p">)</span>
+
+    <span class="c1"># close the channels</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>    
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">vf</span><span class="o">.</span><span class="n">turnon_current_yoko</span><span class="p">(</span><span class="n">CurrentSource_Ib</span><span class="p">)</span>
+        
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">card</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span> <span class="c1"># SQUID</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">short</span><span class="p">)</span> <span class="c1">#open short</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">short</span><span class="p">)</span> <span class="c1">#open short</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#Going to use lists to start with for flexibility, even though slower than arrays</span>
+    <span class="n">Iflux_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">V_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">R_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Offset: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">offset</span><span class="p">)</span>
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource_Ib</span><span class="p">,</span> <span class="n">Ib</span><span class="p">)</span>
+
+    <span class="c1">#Sweep Current up</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_sweeps</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Channel </span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> SweepUp Current:&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">channel1</span><span class="p">,</span><span class="n">channel2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">I_min_flux</span><span class="p">,</span> <span class="n">I_max_flux</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko_GS610</span><span class="p">(</span><span class="n">CurrentSource_Flux</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">read_voltage_fast</span><span class="p">(</span><span class="n">Voltmeter</span><span class="p">,</span> <span class="n">VDwellTime</span><span class="p">)</span>
+            <span class="n">Iflux_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+
+            <span class="c1"># new, for fixing the offset 7/24:</span>
+            <span class="n">V_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="o">-</span><span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">I</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">I</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">Iflux_values</span><span class="p">,</span><span class="n">V_values</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%e</span><span class="s1"> &#39;</span><span class="o">%</span><span class="n">I</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+
+
+
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko_GS610</span><span class="p">(</span><span class="n">CurrentSource_Flux</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">vf</span><span class="o">.</span><span class="n">set_current_fast_yoko</span><span class="p">(</span><span class="n">CurrentSource_Ib</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">card</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span> <span class="c1"># SQUID</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">short</span><span class="p">)</span> <span class="c1">#open short</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">close_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">short</span><span class="p">)</span> <span class="c1">#open short</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">channel1</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card</span><span class="p">,</span><span class="n">channel1</span><span class="p">)</span>
+        <span class="n">vf</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">Switch</span><span class="p">,</span><span class="n">card</span><span class="p">,</span><span class="n">channel2</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">Iflux_values</span><span class="p">,</span> <span class="n">V_values</span><span class="p">,</span> <span class="n">R_values</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+    </div>
+  </body>
+</html>

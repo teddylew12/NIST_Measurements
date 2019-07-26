@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>measure_Resistor_Arrays &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for measure_Resistor_Arrays</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jul 31 11:50:50 2017</span>
+
+<span class="sd">@author: Soroush</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">IV_curve</span> <span class="k">as</span> <span class="nn">iv</span>
+<span class="kn">import</span> <span class="nn">Resistance_curve</span> <span class="k">as</span> <span class="nn">rc</span>
+<span class="kn">import</span> <span class="nn">measure_Ic</span> <span class="k">as</span> <span class="nn">ic</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">exporters</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="c1">#import database_v3 as d</span>
+<span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+<span class="c1">#import database_v3_being_worked_on as d_w</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">Input_Functions</span> <span class="k">as</span> <span class="nn">inpfunc</span>
+<span class="kn">import</span> <span class="nn">Live_Plot_Functions</span> <span class="k">as</span> <span class="nn">lpf</span>
+<span class="c1">#from pygame import mixer</span>
+<span class="c1">#from PyQt5 import QtCore</span>
+
+
+<span class="c1">#===================</span>
+<span class="c1"># main functions to call</span>
+<span class="c1">#===================</span>
+
+<span class="c1"># save all at the end</span>
+
+<div class="viewcode-block" id="measure_Resistor_Arrays"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.measure_Resistor_Arrays">[docs]</a><span class="k">def</span> <span class="nf">measure_Resistor_Arrays</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Main function to call, will measure and save the resistor arrays passed.</span>
+<span class="sd">    Will return the values, to be saved to database after</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inpfunc</span><span class="o">.</span><span class="n">format_input_resistance</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
+    <span class="n">resistance_measurements</span> <span class="o">=</span> <span class="n">get_resistance</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resistance_measurements</span></div>
+
+<span class="c1"># save </span>
+
+<div class="viewcode-block" id="measure_Resistor_Arrays_and_save"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.measure_Resistor_Arrays_and_save">[docs]</a><span class="k">def</span> <span class="nf">measure_Resistor_Arrays_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">meas_id</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    *** BETA ***</span>
+<span class="sd">    Doesn&#39;t work yet</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inpfunc</span><span class="o">.</span><span class="n">format_input_resistance</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
+    <span class="n">resistance_measurements</span><span class="p">,</span> <span class="n">meas_ids</span> <span class="o">=</span> <span class="n">get_resistance_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">meas_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resistance_measurements</span><span class="p">,</span> <span class="n">meas_ids</span></div>
+
+<span class="c1">#===================</span>
+<span class="c1"># measure functions</span>
+<span class="c1">#===================</span>
+
+<span class="c1"># create live plotting elements </span>
+
+<div class="viewcode-block" id="initialization"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.initialization">[docs]</a><span class="k">def</span> <span class="nf">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates all the live plot elements</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_windows</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+    <span class="n">plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_plots</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_curves</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">curves</span></div>
+
+<span class="c1"># plot a current sweep</span>
+
+<div class="viewcode-block" id="get_resistance"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.get_resistance">[docs]</a><span class="k">def</span> <span class="nf">get_resistance</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Inputs are in format: [[cards], [chan1, chan2...]]</span>
+
+<span class="sd">    Takes a sweep from 0 to 3mA and returns the slope    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">slope_plots</span><span class="p">,</span> <span class="n">app</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">my_exporters</span>
+    
+    <span class="c1"># get variables</span>
+    <span class="n">cards</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># arrays that will be returned</span>
+    <span class="n">return_measurements_Resistance</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># check instance, so that it doesn&#39;t crash on exit (hopefully)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">num_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cards</span><span class="p">)</span>
+    
+    <span class="c1"># create windows, plots, curves</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+
+    <span class="c1"># data collection</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># create exporters (trying to fix problem of C object being deleted)</span>
+    <span class="n">my_exporters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_plots</span><span class="p">):</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span>
+        <span class="n">exporter</span> <span class="o">=</span> <span class="n">exporters</span><span class="o">.</span><span class="n">ImageExporter</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+        <span class="n">my_exporters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exporter</span><span class="p">)</span>
+
+    <span class="c1"># loop through and plot slope</span>
+    <span class="c1"># i incremets by 2, counter by 1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+        
+        <span class="n">slope_plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_slope_plots_resistor_arrays</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+        
+        <span class="c1"># get current number of JJ and channels</span>
+        <span class="n">chan1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">chan2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+        
+        <span class="c1"># bring current window to focus        </span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="o">-</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># move to other desktop, spyder had been blocking before</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">setWindowState</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowActive</span><span class="p">)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+        
+        <span class="c1"># this will activate the window (yellow flashing on icon)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+
+        <span class="c1"># Sweep from 0 to 3 mA</span>
+        <span class="n">max_current</span> <span class="o">=</span> <span class="mi">3</span><span class="n">e</span><span class="o">-</span><span class="mi">03</span>
+        
+        <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">plot_Resistance_Array_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span> <span class="n">cards</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span> <span class="n">chan1</span><span class="p">,</span> <span class="n">chan2</span><span class="p">,</span> <span class="n">max_current</span><span class="p">)</span>
+        <span class="c1"># plot the slope and get the location it was plotted</span>
+        <span class="n">resistances</span><span class="p">,</span> <span class="n">indicies</span> <span class="o">=</span> <span class="n">plot_slope</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">resistances</span><span class="p">)</span>
+        
+        <span class="c1"># set label</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">resistances</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">indicies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Slope: &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">resistances</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">5</span><span class="p">))</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">V</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="c1"># append to total data</span>
+        <span class="n">return_measurements_Resistance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resistances</span><span class="p">)</span>
+
+        <span class="c1"># create name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">create_name</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">[</span><span class="n">counter</span><span class="p">])</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+        <span class="c1"># saving</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_Resistor_Array.png&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">ic</span><span class="o">.</span><span class="n">create_dir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        
+        
+        <span class="n">iv</span><span class="o">.</span><span class="n">save_data_live</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span><span class="p">,(</span><span class="n">folder</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_Resistor_Array_raw.dat&quot;</span><span class="p">))</span>
+        
+        <span class="n">save_resistance_data</span><span class="p">(</span><span class="n">resistances</span><span class="p">,</span> <span class="n">folder</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_exporters</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;oh noooo, wrapped object was deleted</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c1">#play sound when done    </span>
+<span class="c1">#    mixer.init()</span>
+<span class="c1">#    mixer.music.load(&quot;Whoomp-There-It-Is.mp3&quot;)</span>
+<span class="c1">#    mixer.music.set_volume(0.4)</span>
+<span class="c1">#    time.sleep(0.25)</span>
+<span class="c1">#    mixer.music.play(1)</span>
+<span class="c1">#    </span>
+<span class="c1">#    print(&quot;Please close all windows to finish&quot;)</span>
+<span class="c1">#    app.exec_()</span>
+<span class="c1">#    app.processEvents()</span>
+    <span class="k">return</span> <span class="n">return_measurements_Resistance</span></div>
+
+
+<span class="c1">#===================</span>
+<span class="c1"># Beta </span>
+<span class="c1">#===================</span>
+<span class="k">def</span> <span class="nf">get_resistance_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">meas_id</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">slope_plots</span><span class="p">,</span> <span class="n">app</span>
+    <span class="k">global</span> <span class="n">windows</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">my_exporters</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    *** BETA ***</span>
+<span class="sd">    Doesn&#39;t work yet</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1"># get variables</span>
+    <span class="n">cards</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># arrays that will be returned</span>
+    <span class="n">return_measurements_Resistance</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># check instance, so that it doesn&#39;t crash on exit (hopefully)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">num_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cards</span><span class="p">)</span>
+    
+    <span class="c1"># create windows, plots, curves</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">initialization</span><span class="p">(</span><span class="n">num_plots</span><span class="p">)</span>
+
+    <span class="c1"># data collection</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># create exporters (trying to fix problem of C object being deleted)</span>
+    <span class="n">my_exporters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_plots</span><span class="p">):</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span>
+        <span class="n">exporter</span> <span class="o">=</span> <span class="n">exporters</span><span class="o">.</span><span class="n">ImageExporter</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+        <span class="n">my_exporters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exporter</span><span class="p">)</span>
+
+    <span class="c1"># loop through and plot slope</span>
+    <span class="c1"># i incremets by 2, counter by 1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+        
+        <span class="n">slope_plots</span> <span class="o">=</span> <span class="n">lpf</span><span class="o">.</span><span class="n">create_slope_plots_resistor_arrays</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span>
+        
+        <span class="c1"># get current number of JJ and channels</span>
+        <span class="n">chan1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">chan2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+        
+        <span class="c1"># bring current window to focus        </span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="o">-</span><span class="mi">900</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># move to other desktop, spyder had been blocking before</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">setWindowState</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowActive</span><span class="p">)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+        
+        <span class="c1"># this will activate the window (yellow flashing on icon)</span>
+        <span class="n">windows</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+
+        <span class="c1"># Sweep from 0 to 3 mA</span>
+        <span class="n">I</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">rc</span><span class="o">.</span><span class="n">plot_Resistance_Array_live</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">curves</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span> <span class="n">cards</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span> <span class="n">chan1</span><span class="p">,</span> <span class="n">chan2</span><span class="p">)</span>
+        <span class="c1"># plot the slope and get the location it was plotted</span>
+        <span class="n">resistances</span><span class="p">,</span> <span class="n">indicies</span> <span class="o">=</span> <span class="n">plot_slope</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">resistances</span><span class="p">)</span>
+        
+        <span class="c1"># set label</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">resistances</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">indicies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Slope: &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">resistances</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fill</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">5</span><span class="p">))</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">V</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">plots</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="c1"># append to total data</span>
+        <span class="n">return_measurements_Resistance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resistances</span><span class="p">)</span>
+
+        <span class="c1"># create name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">create_name</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">[</span><span class="n">counter</span><span class="p">])</span>
+        <span class="n">plots</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+        <span class="c1"># saving</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_Resistance.png&quot;</span><span class="p">)</span>
+        <span class="n">ic</span><span class="o">.</span><span class="n">create_dir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        
+        <span class="n">iv</span><span class="o">.</span><span class="n">save_data_live</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">R</span><span class="p">,(</span><span class="n">folder</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_Resistance_raw.dat&quot;</span><span class="p">))</span>
+        
+        <span class="n">save_resistance_data</span><span class="p">(</span><span class="n">resistances</span><span class="p">,</span> <span class="n">folder</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_exporters</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;oh noooo, wrapped object was deleted</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        
+        <span class="c1"># save to database</span>
+<span class="c1">#        d_w.save_________________(chip, resistances, meas_id[counter], devices[counter])</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c1">#play sound when done    </span>
+<span class="c1">#    mixer.init()</span>
+<span class="c1">#    mixer.music.load(&quot;Whoomp-There-It-Is.mp3&quot;)</span>
+<span class="c1">#    mixer.music.set_volume(0.4)</span>
+<span class="c1">#    time.sleep(0.25)</span>
+<span class="c1">#    mixer.music.play(1)</span>
+<span class="c1">#    </span>
+<span class="c1">#    print(&quot;Please close all windows to finish&quot;)</span>
+<span class="c1">#    app.exec_()</span>
+<span class="c1">#    app.processEvents()</span>
+    <span class="k">return</span> <span class="n">return_measurements_Resistance</span><span class="p">,</span> <span class="n">meas_id</span>
+
+<div class="viewcode-block" id="plot_slope"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.plot_slope">[docs]</a><span class="k">def</span> <span class="nf">plot_slope</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">V</span><span class="p">,</span> <span class="n">counter</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Plots the slope in red on top of the sweep taken</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">slope_plots</span><span class="p">,</span> <span class="n">app</span>
+    
+    <span class="n">slope_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">slope_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">indicies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">resistances</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_slope_plot</span> <span class="o">=</span> <span class="n">slope_plots</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.5e-03</span><span class="p">):</span>
+            <span class="n">indicies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">03</span><span class="p">):</span>
+            <span class="n">indicies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="n">e</span><span class="o">-</span><span class="mi">03</span><span class="p">):</span>
+            <span class="n">indicies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indicies</span><span class="p">)):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">indicies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">slope_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">slope_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">slope_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">slope_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">current_slope_plot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">slope_x</span><span class="p">,</span> <span class="n">slope_y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolBrush</span> <span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">resistances</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">slope_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">slope_y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">slope_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">slope_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">slope_x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">slope_y</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">return</span> <span class="n">resistances</span><span class="p">,</span> <span class="n">indicies</span></div>
+
+<div class="viewcode-block" id="save_resistance_data"><a class="viewcode-back" href="../code.html#measure_Resistor_Arrays.save_resistance_data">[docs]</a><span class="k">def</span> <span class="nf">save_resistance_data</span><span class="p">(</span><span class="n">resistances</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Saves the values found for the resistances in a .dat file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">column</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="p">))</span>
+<span class="c1">#    print(Rn)</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">resistances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">resistances</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">resistances</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_Resistor_Array.dat&quot;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;row1: @ 0.5 mA, row2: @ 1mA, row3: @ 2mA </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+    </div>
+  </body>
+</html>

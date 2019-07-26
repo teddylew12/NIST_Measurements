@@ -1,0 +1,381 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Measurement_Functions &#8212; SFQ Chip Testing Automation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Measurement_Functions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jul 10 15:51:37 2017</span>
+
+<span class="sd">@author: Soroush + Javi + Ted</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">measure_Ic</span> <span class="k">as</span> <span class="nn">ic</span>
+<span class="kn">import</span> <span class="nn">measure_Rn</span> <span class="k">as</span> <span class="nn">rn</span>
+
+<span class="kn">import</span> <span class="nn">measure_Resistor_Arrays_v2</span> <span class="k">as</span> <span class="nn">mra</span>
+<span class="kn">import</span> <span class="nn">measure_Device_Resistance</span> <span class="k">as</span> <span class="nn">mdr</span>
+<span class="kn">import</span> <span class="nn">measure_Via_Resistance</span> <span class="k">as</span> <span class="nn">mvr</span>
+
+<span class="kn">import</span> <span class="nn">time</span> 
+<span class="kn">import</span> <span class="nn">database_v4</span> <span class="k">as</span> <span class="nn">d</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Measurement flow: all completed by the fulltest button on the GUI</span>
+<span class="sd">    </span>
+<span class="sd">    1. Plug in probe while it is not dunked</span>
+<span class="sd">    </span>
+<span class="sd">    2. Run measure_PCM_chip_warm before dunking. Will plot simple I-V line to make</span>
+<span class="sd">        sure there are no open connections, and measure RT values</span>
+<span class="sd">        </span>
+<span class="sd">    3. Slowly dunk probe</span>
+<span class="sd">    </span>
+<span class="sd">    4. Call measure_PCM_chip_cold. This will take IV&#39;s of all the devices on the PCM</span>
+<span class="sd">        i.e. SJs and arrays. Then it will find resistance of Resistor Arrays and Vias</span>
+<span class="sd">        then it find normal resistance for devices</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># globals</span>
+<span class="n">dirname</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;E:/Users/volt.686QVACTEST/National Institute of Standards and Technology (NIST)/SEG - SFQ_Circuits/&quot;</span><span class="p">)</span>
+<span class="n">web_link</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/Forms/AllItems.aspx?newTargetListUrl=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents&amp;viewpath=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">Forms</span><span class="si">%2F</span><span class="s2">AllItems</span><span class="si">%2E</span><span class="s2">aspx&amp;id=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">SFQ_Circuits_Measurements</span><span class="si">%2F</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">web_link</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;https://nistgov.sharepoint.com/sites/SEG/Shared%20Documents/Forms/AllItems.aspx?newTargetListUrl=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents&amp;viewpath=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">Forms</span><span class="si">%2F</span><span class="s2">AllItems</span><span class="si">%2E</span><span class="s2">aspx&amp;id=</span><span class="si">%2F</span><span class="s2">sites</span><span class="si">%2F</span><span class="s2">SEG</span><span class="si">%2F</span><span class="s2">Shared%20Documents</span><span class="si">%2F</span><span class="s2">SFQ_Circuits_Measurements</span><span class="si">%2F</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="measure_PCM_chip_cold"><a class="viewcode-back" href="../code.html#Measurement_Functions.measure_PCM_chip_cold">[docs]</a><span class="k">def</span> <span class="nf">measure_PCM_chip_cold</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">optionalic</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is the main function to call when PCM chip is fully dunked. Will </span>
+<span class="sd">    measure and save the ICs of all the Junctions, then the resistances of the</span>
+<span class="sd">    resistor arrays and vias, then the normal resistance of the junctions.</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: Target chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param devices: Array of target devices</span>
+<span class="sd">   </span>
+<span class="sd">    :param optionalIC: Optional input Ic</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: IV and RN graphs</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measurement_GUI_v3-coldmeasure</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        -Get_Ic_Iret_and_save</span>
+<span class="sd">        </span>
+<span class="sd">        -get_resistance_arrays</span>
+<span class="sd">        </span>
+<span class="sd">        -get_resistance_Via</span>
+<span class="sd">        </span>
+<span class="sd">        -save_Resistance_Measurements_cold</span>
+<span class="sd">        </span>
+<span class="sd">        -save_Via_Measurements_cold</span>
+<span class="sd">        </span>
+<span class="sd">        -get_Rn_Imax_and_save</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S_cold&quot;</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">dirname</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">folder_link</span> <span class="o">=</span> <span class="n">web_link</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">Jc</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">chip_Jc</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Weblink: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">folder_link</span><span class="p">)</span>
+    
+    <span class="c1"># sort the devices into Junctions, Resistors, and Vias</span>
+    <span class="n">JJs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">RAs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Vias</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="s1">&#39;ResistorArray&#39;</span><span class="p">:</span>
+            <span class="n">RAs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="s1">&#39;Via&#39;</span><span class="p">:</span>
+            <span class="n">Vias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">JJs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+       
+    <span class="c1"># added 1/18/18, not tested yet</span>
+    <span class="n">design</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_chip</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">.</span><span class="n">design_id</span>
+    
+    <span class="k">if</span> <span class="n">design</span> <span class="o">==</span><span class="mi">4</span> <span class="ow">and</span> <span class="n">optionalic</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">You are measuring a SingleJJ design without passing in an </span><span class="se">\</span>
+<span class="s2">              optional ic. In order to take a high point density sweep you </span><span class="se">\</span>
+<span class="s2">              must pass in an optional ic.&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># take IV curves for all Junctions, save after each device</span>
+    <span class="k">if</span> <span class="n">optionalic</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># optional was not passed in</span>
+        <span class="n">Ic_measurements</span><span class="p">,</span> <span class="n">meas_ids</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">get_Ic_Iret_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">JJs</span><span class="p">,</span> <span class="n">Jc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># optional was passed in, pass on to next function</span>
+        <span class="n">Ic_measurements</span><span class="p">,</span> <span class="n">meas_ids</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">get_Ic_Iret_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">JJs</span><span class="p">,</span> <span class="n">Jc</span><span class="p">,</span> <span class="n">optionalic</span><span class="o">=</span><span class="n">optionalic</span><span class="p">)</span>
+    
+    <span class="c1"># if there was a keyboard interrupt, do not continue</span>
+    <span class="k">if</span> <span class="n">Ic_measurements</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">meas_ids</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># take the sweep to find the resistance of the Resistor Arrays</span>
+    <span class="n">Resistance_measurements</span> <span class="o">=</span> <span class="n">mra</span><span class="o">.</span><span class="n">get_resistance_arrays</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">RAs</span><span class="p">)</span>
+    <span class="c1"># save the resistance measurements </span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Resistance_measurements</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">save_Resistance_Measurements_cold</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Resistance_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">RAs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>    
+
+    <span class="c1"># take the sweep to find the resistance of the Vias</span>
+    <span class="n">Via_measurements</span> <span class="o">=</span> <span class="n">mvr</span><span class="o">.</span><span class="n">get_Resistance_Via</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">Vias</span><span class="p">)</span>
+    <span class="c1"># save the via measurements</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Via_measurements</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">save_Via_Measurements_cold</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Via_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">Vias</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># find normal resistance for all Junctions, save after each</span>
+    <span class="k">if</span> <span class="n">optionalic</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">meas_ids</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># only do if Ic was not passed in, and there was a return for meas_id</span>
+        <span class="c1"># Note: meas_ids will be 0 iff there was a keyboard interrupt handled</span>
+        <span class="n">Rn_measurements</span><span class="p">,</span> <span class="n">Imax_measurements</span> <span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">get_Rn_Imax_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">JJs</span><span class="p">,</span> <span class="n">meas_ids</span><span class="p">)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Weblink: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">folder_link</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="measure_PCM_chip_warm"><a class="viewcode-back" href="../code.html#Measurement_Functions.measure_PCM_chip_warm">[docs]</a><span class="k">def</span> <span class="nf">measure_PCM_chip_warm</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is the main function to call when PCM chip hasn&#39;t been dunked. Will </span>
+<span class="sd">    measure the continuity of all the Junctions, then the resistances of the</span>
+<span class="sd">    resistor arrays and vias, and save the resistances to the database.</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: Target chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param devices: Array of target devices</span>
+<span class="sd">   </span>
+<span class="sd">    :return: funkygraph2-array of abnormal graphs</span>
+<span class="sd">    </span>
+<span class="sd">    :Graphs: Continuity Graphs, IV from 0 mA to 300 mA</span>
+<span class="sd">    </span>
+<span class="sd">    Called By:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measurement_GUI_v3-warmmeasure</span>
+<span class="sd">    </span>
+<span class="sd">    Calls On:</span>
+<span class="sd">        </span>
+<span class="sd">        -Get_Resistance</span>
+<span class="sd">        </span>
+<span class="sd">        -get_resistance_arrays</span>
+<span class="sd">        </span>
+<span class="sd">        -get_resistance_Via</span>
+<span class="sd">        </span>
+<span class="sd">        -save_Resistance_Measurements_warm</span>
+<span class="sd">        </span>
+<span class="sd">        -save_Via_Measurements_warm</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S_warm&quot;</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">dirname</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">folder_link</span> <span class="o">=</span> <span class="n">web_link</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">Jc</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">chip_Jc</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Weblink: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">folder_link</span><span class="p">)</span>
+    
+    <span class="c1"># sort the devices into Junctions, Resistors, and Vias</span>
+    <span class="n">JJs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">RAs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Vias</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="s1">&#39;ResistorArray&#39;</span><span class="p">:</span>
+            <span class="n">RAs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">device_type</span> <span class="o">==</span> <span class="s1">&#39;Via&#39;</span><span class="p">:</span>
+            <span class="n">Vias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">JJs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">funkygraph2</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">device_resistance</span><span class="p">,</span><span class="n">funkygraph2</span> <span class="o">=</span> <span class="n">mdr</span><span class="o">.</span><span class="n">get_Resistance</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">JJs</span><span class="p">)</span>
+ 
+    
+    <span class="c1"># take the sweep to find the resistance of the Resistor Arrays</span>
+    <span class="n">Resistance_measurements</span> <span class="o">=</span> <span class="n">mra</span><span class="o">.</span><span class="n">get_resistance_arrays</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">RAs</span><span class="p">)</span>
+    <span class="c1">#Resistance_measurements = mra.get_resistance_arrays(folder, chip, RAs)</span>
+    <span class="c1"># save the resistance measurements </span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Resistance_measurements</span><span class="p">)):</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">save_Resistance_Measurements_warm</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Resistance_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">RAs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="c1"># take the sweep for the vias</span>
+    <span class="n">Via_measurements</span> <span class="o">=</span> <span class="n">mvr</span><span class="o">.</span><span class="n">get_Resistance_Via</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">Vias</span><span class="p">)</span>
+    <span class="c1"># save the via measurements</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Via_measurements</span><span class="p">)):</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">save_Via_Measurements_warm</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">Via_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">folder_link</span><span class="p">,</span> <span class="n">Vias</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Weblink: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">folder_link</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">funkygraph2</span></div>
+<span class="c1">#===================</span>
+<span class="c1"># check to make sure there are no opens</span>
+<span class="c1"># simply takes a current sweep and returns the slope</span>
+<span class="c1">#===================</span>
+
+<div class="viewcode-block" id="check_connections"><a class="viewcode-back" href="../code.html#Measurement_Functions.check_connections">[docs]</a><span class="k">def</span> <span class="nf">check_connections</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Simply check that there are no opens. Takes a current sweep from 0 to 3mA</span>
+<span class="sd">    saves images and raw numbers.</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: Target chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param devices: Array of target devices</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S_connections&quot;</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">dirname</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">folder_link</span> <span class="o">=</span> <span class="n">web_link</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">R</span><span class="p">,</span> <span class="n">notused</span> <span class="o">=</span> <span class="n">mdr</span><span class="o">.</span><span class="n">get_Resistance</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">R</span><span class="p">)</span></div>
+    <span class="c1"># save to the database here</span>
+
+
+<div class="viewcode-block" id="measure_JJs_Ic"><a class="viewcode-back" href="../code.html#Measurement_Functions.measure_JJs_Ic">[docs]</a><span class="k">def</span> <span class="nf">measure_JJs_Ic</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span><span class="n">optionalIc</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes just an I-V curve for the JJs, saves images but does not add to the</span>
+<span class="sd">    database</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: Target chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param devices: Array of target devices</span>
+<span class="sd">   </span>
+<span class="sd">    :param optionalIC: Optional input Ic</span>
+<span class="sd">    </span>
+<span class="sd">    Calls:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measure_Ic-get_Ic_Iret_and_save</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">dirname</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">folder_link</span> <span class="o">=</span> <span class="n">web_link</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">current_time</span>
+    <span class="n">Jc</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">chip_Jc</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+    
+    <span class="c1"># take sweeps</span>
+    <span class="n">Ic_measurements</span> <span class="o">=</span> <span class="n">ic</span><span class="o">.</span><span class="n">get_Ic_Iret_and_save</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">Jc</span><span class="p">,</span> <span class="n">optionalIc</span><span class="p">)</span></div>
+                               
+<div class="viewcode-block" id="measure_JJs_Rn"><a class="viewcode-back" href="../code.html#Measurement_Functions.measure_JJs_Rn">[docs]</a><span class="k">def</span> <span class="nf">measure_JJs_Rn</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes just the normal resistance sweep for the JJs, saves images but does </span>
+<span class="sd">    not add to the database</span>
+<span class="sd">    </span>
+<span class="sd">    :param chip: Target chip</span>
+<span class="sd">    </span>
+<span class="sd">    :param devices: Array of target devices</span>
+
+<span class="sd">    Calls:</span>
+<span class="sd">        </span>
+<span class="sd">        -Measure_Rn-Measure_Rn_Imax</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="p">(</span><span class="n">dirname</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span><span class="o">+</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;_%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">))</span>
+    <span class="n">Jc</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">chip_Jc</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
+
+    <span class="c1"># take sweeps</span>
+    <span class="n">Rn_measurements</span><span class="p">,</span> <span class="n">Imax_measurements</span> <span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">get_Rn_Imax</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">devices</span><span class="p">)</span></div>
+
+<span class="c1">#TODO add to front end. @ ted we do use this one</span>
+<div class="viewcode-block" id="copy_design"><a class="viewcode-back" href="../code.html#Measurement_Functions.copy_design">[docs]</a><span class="k">def</span> <span class="nf">copy_design</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Copies a design, allowing mass copying of device</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">designs</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">show_all_designs</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">designs</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">designs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;c: cancel</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Please enter the number of the design you wish to copy:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">inp</span><span class="o">==</span><span class="s1">&#39;c&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">inp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">)(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;wrong&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+        
+    <span class="n">des_id</span> <span class="o">=</span> <span class="n">designs</span><span class="p">[</span><span class="n">inp</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">copy_design</span><span class="p">(</span><span class="n">des_id</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">rv</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Something went wrong&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SFQ Chip Testing Automation 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Soroush Khadem, Javier Pulecio.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>
